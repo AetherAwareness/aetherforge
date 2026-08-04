@@ -252,8 +252,15 @@ Dashboard: Approve / Reject / Force promote.
 
 ---
 
-## 14. Next reading
+## 14. Sister tools
 
-[product.md](product.md) · [getting-started.md](getting-started.md) · [architecture.md](architecture.md) · [guides/studio.md](guides/studio.md) · [safety.md](safety.md)
+| Tool | Repo | Role |
+|------|------|------|
+| **Aether Switchboard** | [aether-switchboard](https://github.com/AetherAwareness/aether-switchboard) | Register/hot-swap local models & capability lanes — [GUIDE](https://github.com/AetherAwareness/aether-switchboard/blob/main/docs/GUIDE.md) |
+| **Aether Constellation** | [aether-constellation](https://github.com/AetherAwareness/aether-constellation) | Live service nerve-map + TCP probes — [GUIDE](https://github.com/AetherAwareness/aether-constellation/blob/main/docs/GUIDE.md) |
 
-*AetherForge · © 2026 AetherAwareness · PolyForm Noncommercial 1.0.0*
+## 15. Next reading
+
+[HOWTO.md](HOWTO.md) · [product.md](product.md) · [getting-started.md](getting-started.md) · [architecture.md](architecture.md) · [guides/studio.md](guides/studio.md) · [safety.md](safety.md)
+
+*AetherForge · © 2026 AetherAwareness · PolyForm Noncommercial 1.0.0 · admin@aetherawareness.com*
