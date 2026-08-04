@@ -256,7 +256,6 @@ Dashboard: Approve / Reject / Force promote.
 
 | Tool | Repo | Role |
 |------|------|------|
-| **Aether Switchboard** | [aether-switchboard](https://github.com/AetherAwareness/aether-switchboard) | Register/hot-swap local models & capability lanes — [GUIDE](https://github.com/AetherAwareness/aether-switchboard/blob/main/docs/GUIDE.md) |
 | **Aether Constellation** | [aether-constellation](https://github.com/AetherAwareness/aether-constellation) | Live service nerve-map + TCP probes — [GUIDE](https://github.com/AetherAwareness/aether-constellation/blob/main/docs/GUIDE.md) |
 
 ## 15. Next reading

@@ -108,11 +108,12 @@ Then open `aetherforge dashboard` → Approve / Reject / Force promote.
 | `scorecard.json` | CI vs MoE labels |
 | `promoted/DRY_RUN_NOT_MOE_READY.txt` | Dry-run honesty stamp |
 
-## After training: serve with Switchboard
+## After training: serve the model
 
 1. Convert/quantize adapter to your serving format (e.g. GGUF) as you prefer  
-2. Register with [Aether Switchboard](https://github.com/AetherAwareness/aether-switchboard)  
-3. Map ports on [Aether Constellation](https://github.com/AetherAwareness/aether-constellation)  
+2. Serve with your usual local stack (llama-server, Ollama, vLLM, etc.)  
+3. Optionally map ports on [Aether Constellation](https://github.com/AetherAwareness/aether-constellation)  
+ 
 
 ## Tests
 
