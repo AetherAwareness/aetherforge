@@ -9,8 +9,6 @@ tags:
   - moe
   - mixture-of-experts
   - fine-tuning
-  - deepseek
-  - qwen
   - post-training
   - peft
   - lora
@@ -44,10 +42,10 @@ aetherforge doctor
 
 | Feature | Description |
 |---------|-------------|
-| Expert Group Studio | Lattice paint, ~active-fire sectors (~13B Flash / ~3B A3B) |
+| Expert Group Studio | Lattice paint, ~active-fire sectors (~one active fire for the model family) |
 | Sector forensics | What each sector contains + edit recommendations |
 | Postures | specialist · broad · wide (PEFT lattice scale) |
-| Flash-0731 | Fused expert PEFT (`target_parameters` + grad masks) |
+| fused-expert profile | Fused expert PEFT (`target_parameters` + grad masks) |
 | Remote train | Vast.ai / RunPod / SSH |
 | Domain packs | Any industry — no hard-coded field content |
 
@@ -56,12 +54,12 @@ aetherforge doctor
 ```bash
 aetherforge train -c configs/base.yaml -c recipes/generic_dryrun.yaml --dry-run
 aetherforge validate-flash
-aetherforge groups --preview --family deepseek_v4_flash --num-groups 12
-aetherforge forensics --family deepseek_v4_flash --num-groups 12 --markdown
+aetherforge groups --preview --family generic_moe --num-groups 12
+aetherforge forensics --family generic_moe --num-groups 12 --markdown
 aetherforge dashboard   # http://127.0.0.1:8765/
 
 # Broad multi-skill (2×96GB-class)
-aetherforge train -c configs/base.yaml -c configs/deepseek_v4_flash.yaml \
+aetherforge train -c configs/base.yaml -c configs/moe_v4_flash.yaml \
   -c recipes/broad_flash_192gb.yaml --dry-run
 ```
 
@@ -70,7 +68,7 @@ aetherforge train -c configs/base.yaml -c configs/deepseek_v4_flash.yaml \
 ```bash
 aetherforge connect vast --host IP --port PORT
 aetherforge remote launch --exec -c configs/base.yaml \
-  -c configs/deepseek_v4_flash.yaml -c recipes/broad_flash_192gb.yaml
+  -c configs/moe_v4_flash.yaml -c recipes/broad_flash_192gb.yaml
 aetherforge remote pull
 ```
 

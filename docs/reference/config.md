@@ -24,7 +24,7 @@ Hierarchical YAML merged left→right; `-o` dotlist overrides last.
 ```bash
 aetherforge train \
   -c configs/base.yaml \
-  -c configs/deepseek_v4_flash.yaml \
+  -c configs/<moe_family_profile>.yaml \
   -c recipes/broad_flash_192gb.yaml \
   -o training.max_steps=500 \
   -o data.domain=logistics
@@ -39,7 +39,7 @@ Later files and `-o` win. `load_config` then applies `apply_posture_defaults()`.
 | Key | Type | Notes |
 |-----|------|-------|
 | `name` | str | HF id |
-| `family` | auto \| deepseek_v4_flash \| qwen_a3b \| generic_moe | |
+| `family` | auto \| generic_moe \| generic_moe \| generic_moe | |
 | `local_path` | str? | Full safetensors directory |
 | `load_in_4bit` / `load_in_8bit` | bool | |
 | `max_seq_length` | int | |

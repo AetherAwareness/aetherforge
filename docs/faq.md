@@ -17,15 +17,15 @@ nav_order: 8
 
 ### Does AetherForge train the full Flash safetensors model?
 
-It **loads** the full open checkpoint (or shards) and trains **adapters** (ESFT/LoRA) by default — including fused routed experts. That is the supported “full safetensors” product path. It does **not** mean full bf16 Adam on all ~284B parameters.
+It **loads** the full open checkpoint (or shards) and trains **adapters** (ESFT/LoRA) by default — including fused routed experts. That is the supported “full safetensors” product path. It does **not** mean full bf16 Adam on all frontier-scale total parameter counts parameters.
 
 ### Will 2× RTX 6000 (192 GB) work?
 
-**Yes** for specialist, **broad**, and (with care) **wide** PEFT on Flash-0731. See [Hardware]({% link guides/hardware.md %}).
+**Yes** for specialist, **broad**, and (with care) **wide** PEFT on fused-expert profile. See [Hardware]({% link guides/hardware.md %}).
 
 ### Why is my LoRA missing experts on Flash?
 
-You must target fused parameters (`gate_up_proj`, `down_proj`) via PEFT `target_parameters`. `target_modules` alone often only hits **shared** MLPs. Use `configs/deepseek_v4_flash.yaml` or `aetherforge validate-flash`.
+You must target fused parameters (`gate_up_proj`, `down_proj`) via PEFT `target_parameters`. `target_modules` alone often only hits **shared** MLPs. Use `configs/<moe_family_profile>.yaml` or `aetherforge validate-flash`.
 
 ### Can I train any industry?
 

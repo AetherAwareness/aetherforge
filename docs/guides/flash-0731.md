@@ -1,14 +1,14 @@
 ---
-title: DeepSeek-V4-Flash-0731
+title: Fused-expert MoE PEFT
 layout: default
 parent: Guides
 nav_order: 2
 ---
 
-# DeepSeek-V4-Flash-0731
+# Fused-expert MoE PEFT
 {: .no_toc }
 
-Native support for the open Flash-0731 safetensors checkpoint.
+Native support for the open fused-expert profile safetensors checkpoint.
 {: .fs-6 .fw-300 }
 
 ## Table of contents
@@ -23,15 +23,15 @@ Native support for the open Flash-0731 safetensors checkpoint.
 
 | Field | Value |
 |-------|-------|
-| HF id | `deepseek-ai/DeepSeek-V4-Flash-0731` |
-| model_type | `deepseek_v4` |
-| Class | `DeepseekV4ForCausalLM` |
+| HF id | `<your-open-moe-checkpoint>` |
+| model_type | family-specific |
+| Class | causal LM class for the checkpoint |
 | Layers | **43** |
 | Routed experts | **256** |
 | Top‑k | **6** |
 | Shared | **1** |
 | Hidden / MoE intermediate | 4096 / 2048 |
-| Total / active | ~**284B** / ~**13B** |
+| Total / active | high total / thin active fire |
 
 ### Disk vs runtime
 
@@ -53,7 +53,7 @@ aetherforge validate-flash
 aetherforge validate-flash --out artifacts/flash_validate.json
 ```
 
-Checks: AutoConfig, weight index, PEFT support, meta `DeepseekV4Experts` shapes, synthetic 43×256 refs, LoRA smoke + grad masks.
+Checks: AutoConfig, weight index, PEFT support, meta `fused expert modules` shapes, synthetic layer×expert refs, LoRA smoke + grad masks.
 
 ---
 
@@ -61,28 +61,28 @@ Checks: AutoConfig, weight index, PEFT support, meta `DeepseekV4Experts` shapes,
 
 | File | Role |
 |------|------|
-| `configs/deepseek_v4_flash.yaml` | Model + PEFT targets + groups capacity |
+| `configs/<moe_family_profile>.yaml` | Model + PEFT targets + groups capacity |
 | `recipes/flagship_flash_domain.yaml` | Specialist domain |
 | `recipes/broad_flash_192gb.yaml` | Multi-sector multi-domain (**2×96 GB**) |
 | `recipes/wide_flash_192gb.yaml` | Lattice-scale LoRA |
 
 ```bash
 # Structure dry-run
-aetherforge train -c configs/base.yaml -c configs/deepseek_v4_flash.yaml \
+aetherforge train -c configs/base.yaml -c configs/<moe_family_profile>.yaml \
   -c recipes/broad_flash_192gb.yaml --dry-run
 
 # Live multi-GPU (adapters)
 aetherforge connect vast --host HOST --port PORT
 aetherforge remote launch --exec -c configs/base.yaml \
-  -c configs/deepseek_v4_flash.yaml -c recipes/broad_flash_192gb.yaml
+  -c configs/<moe_family_profile>.yaml -c recipes/broad_flash_192gb.yaml
 ```
 
 Local weights (optional):
 
 ```yaml
 model:
-  name: deepseek-ai/DeepSeek-V4-Flash-0731
-  local_path: "/path/to/DeepSeek-V4-Flash-0731"  # full safetensors folder
+  name: <your-open-moe-checkpoint>
+  local_path: "/path/to/fused-expert MoE profile"  # full safetensors folder
 ```
 
 ---

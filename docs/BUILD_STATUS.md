@@ -2,7 +2,7 @@
 
 ## Version
 
-**0.5.1** — **PolyForm Noncommercial** © AetherAwareness · complete GUIDE · MoE fidelity · Sector Forge · sequential workflow · Flash-0731 PEFT
+**0.5.1** — **PolyForm Noncommercial** © AetherAwareness · complete GUIDE · MoE fidelity · Sector Forge · sequential workflow · fused-expert profile PEFT
 
 ## 0.4.0 — Sector-perfect training loop (2026-08-04)
 
@@ -80,7 +80,7 @@ aetherforge runs        # JSON list of runs
 
 ## Next cuts
 
-1. Live A3B / Flash FT on Vast with real domain pack + corpus (sector workflow end-to-end)  
+1. Live MoE PEFT on Vast with real domain pack + corpus (sector workflow end-to-end)  
 2. Real eval harness driven by pack-defined benchmarks  
 3. Live multi-theme affinity probes feeding forensic content scores  
 4. Live THD via OpenAI-compat LLM  

@@ -76,7 +76,7 @@ AetherForge does **not** auto-rent Vast instances from the UI.
 | Claim | Reality |
 |-------|---------|
 | Train Flash full safetensors with PEFT | Yes on multi-GPU (e.g. 2×96 GB) |
-| Full bf16 Adam on all 284B params | Not the product path |
+| Full bf16 Adam over every parameter of a frontier-scale MoE | Not the product path |
 | Single 24 GB consumer full Flash load | No |
 | Domain packs hard-code medicine | No — industry-agnostic core |
 

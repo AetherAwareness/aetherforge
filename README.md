@@ -9,9 +9,9 @@
 
 **Reliable post-training for open sparse MoE models.**
 
-Carve DeepSeek-V4-Flash-class (~**13B active**) and Qwen A3B-class (~**3B active**) models into visual **expert sectors**, forensically inspect what each sector contains (with honest evidence tiers), train with **specialist / broad / wide** postures, enforce **per-sector data contracts**, promote gated **AetherPackages** — and never confuse dry-run CI completeness with weight-level MoE readiness.
+Carve open **Mixture-of-Experts** checkpoints into visual **expert sectors**, forensically inspect what each sector contains (with honest evidence tiers), train with **specialist / broad / wide** postures, enforce **per-sector data contracts**, promote gated **AetherPackages** — and never confuse dry-run CI completeness with weight-level MoE readiness.
 
-> **v0.5.1** — PolyForm Noncommercial license · complete operator guide · evidence tiers · sequential sector workflow · Flash-0731 PEFT · Training Console  
+> **v0.5.1** — PolyForm Noncommercial · complete operator guide · evidence tiers · sequential sector workflow · fused-expert PEFT · Training Console  
 > **© 2026 AetherAwareness** — free for noncommercial use; **not free to monetize** ([COMMERCIAL.md](COMMERCIAL.md)).
 
 | | |
@@ -21,7 +21,6 @@ Carve DeepSeek-V4-Flash-class (~**13B active**) and Qwen A3B-class (~**3B active
 | **Complete guide** | [docs/GUIDE.md](docs/GUIDE.md) — setup, run, utilize, all postures |
 | **Product deep-dive** | [docs/product.md](docs/product.md) |
 | **User docs site** | [AetherAwareness.github.io/aetherforge](https://AetherAwareness.github.io/aetherforge/) |
-| **HF card template** | [`HF_README.md`](HF_README.md) |
 
 ---
 
@@ -30,7 +29,7 @@ Carve DeepSeek-V4-Flash-class (~**13B active**) and Qwen A3B-class (~**3B active
 Sparse MoE models only fire a thin slice of parameters per token. Generic fine-tuning tools:
 
 - treat them like dense models, or  
-- miss **fused** expert banks (DeepSeek-V4 Flash), or  
+- miss **fused** expert banks used by many modern MoEs, or  
 - give no map of which capacity you are editing.
 
 | Capability | Benefit |
@@ -42,12 +41,14 @@ Sparse MoE models only fire a thin slice of parameters per token. Generic fine-t
 | **Plan freeze** | Immutable membership fingerprint for each train wave |
 | **Probe keep/rollback** | Pre/post routing share; rollback on regression |
 | **Postures** | `specialist` · **`broad`** · `wide` lattice LoRA |
-| **Flash-0731** | PEFT `target_parameters` + expert-index grad masks |
+| **Fused-expert PEFT** | `target_parameters` + expert-index grad masks where needed |
 | **Scorecard** | **CI completeness** vs **MoE reliability** (honest labels) |
 | **Remote train** | Vast / RunPod / SSH — plan → sync → nohup → pull |
 | **Domain packs** | Any industry — no hard-coded field bleed |
 
-> Full bf16 retrain of ~284B is **not** the product goal. AetherForge trains **adapters (ESFT/LoRA)** on the full open safetensors checkpoint (optional selective full-expert updates).
+> Full dense-style retrain of entire multi-hundred-billion MoE lattices is **not** the product goal. AetherForge trains **adapters (ESFT/LoRA)** on open checkpoints (optional selective full-expert updates).
+
+**Model coverage:** AetherForge targets **open sparse MoEs in general** (module-list experts *and* fused expert banks). Built-in family profiles and recipes cover common shapes; you can add capacity/config for other MoEs via YAML.
 
 ---
 
@@ -60,25 +61,17 @@ bash scripts/install.sh
 source .venv/bin/activate
 
 aetherforge quickstart                 # doctor + smoke dry-run + next steps
-aetherforge status                     # Vast / Flash / runs / what to do next
-aetherforge recipes                    # named presets (no long -c chains)
+aetherforge status
+aetherforge recipes
 aetherforge dashboard                  # http://127.0.0.1:8765/
 ```
 
 ```bash
-# One-flag recipes
 aetherforge train --recipe dryrun --dry-run
-aetherforge train --recipe broad-flash --dry-run     # multi-sector (2×96GB class)
-aetherforge train --recipe wide-flash --dry-run
-
-# Scaffold any industry pack
+aetherforge train --recipe broad-flash --dry-run
 aetherforge init logistics --posture broad
 aetherforge train --recipe broad-flash -c configs/domains/logistics.yaml --dry-run
-
-# Prove Flash-0731 train stack (no full weight download)
-aetherforge validate-flash
-
-# Sector workflow plan only (forensics + datasets)
+aetherforge validate-flash             # prove fused-expert PEFT stack
 aetherforge workflow -c configs/base.yaml -c recipes/generic_dryrun.yaml --plan-only --dry-run
 ```
 
@@ -89,19 +82,17 @@ aetherforge workflow -c configs/base.yaml -c recipes/generic_dryrun.yaml --plan-
 When `training.sector_mode: sequential` (default), each train-enabled sector is its own mini-pipeline:
 
 1. **Freeze plan fingerprint** — membership cannot silently change mid-wave  
-2. **Forensic assess** — evidence tier + calibrated themes (no multi-theme soup from unbound geometry)  
+2. **Forensic assess** — evidence tier + calibrated themes  
 3. **Readiness gate** — warn / block / skip  
-4. **Sector dataset + data contract** — match corpus, synth fill, enforce quality  
-5. **Pre-probe** routing mass on the sector’s cells  
+4. **Sector dataset + data contract**  
+5. **Pre-probe** routing mass  
 6. **ESFT** only that sector’s experts; siblings frozen  
 7. **Post-probe → keep or rollback**  
 8. **Interference summary** across sectors  
 
-Artifacts under each run include `sector_forensics.json`, `plan_freeze.json`, `sector_workflow/`, `PROMOTION_LABEL.txt`, and (on dry-run) `AFFINITY_SYNTHETIC.txt` + `promoted/DRY_RUN_NOT_MOE_READY.txt`.
-
 ```bash
 aetherforge train -c configs/base.yaml -c recipes/generic_dryrun.yaml --dry-run
-aetherforge train --recipe dryrun --sector-mode joint --dry-run   # legacy single-pass
+aetherforge train --recipe dryrun --sector-mode joint --dry-run   # single-pass ESFT
 ```
 
 ---
@@ -110,23 +101,21 @@ aetherforge train --recipe dryrun --sector-mode joint --dry-run   # legacy singl
 
 | Tier | Meaning |
 |------|---------|
-| **structure_only** | Geometry / mass / depth — **no content claim** (themes zeroed) |
+| **structure_only** | Geometry / mass / depth — **no content claim** |
 | **assignment** | Operator or pack bound domain/topics/keywords |
-| **routing_probed** | Affinity/routing matrix present (may still be **synthetic** fixture) |
-
-High-confidence content claims are refused without real routing evidence. Synthetic dry-run affinity is watermarked and never presented as weight-level forensics.
+| **routing_probed** | Affinity/routing matrix present (may be synthetic in dry-run) |
 
 ---
 
 ## Training postures
 
-| Posture | Coverage | Recipe | 2×96 GB Flash |
-|---------|----------|--------|----------------|
-| **specialist** | Few experts / selected sectors | `flagship_flash_domain` | easy |
-| **broad** | ~28% experts, top‑N sectors, multi-domain | **`broad_flash_192gb`** | **sweet spot** |
-| **wide** | Lattice LoRA (still PEFT) | `wide_flash_192gb` | heavier |
+| Posture | Coverage |
+|---------|----------|
+| **specialist** | Few experts / selected sectors, one domain |
+| **broad** | Many experts + multi-sector + multi-corpus |
+| **wide** | Lattice-scale LoRA (still PEFT) |
 
-Details: [docs/guides/postures.md](docs/guides/postures.md) · [docs/BROAD_WORK.md](docs/BROAD_WORK.md)
+Details: [docs/guides/postures.md](docs/guides/postures.md)
 
 ---
 
@@ -137,15 +126,15 @@ Details: [docs/guides/postures.md](docs/guides/postures.md) · [docs/BROAD_WORK.
 | **ci_completeness** | Pipeline, data, proxies passed (includes dry-run) |
 | **moe_reliability** | Live model + non-synthetic routing (+ sector keep when wave ran) |
 
-Dry-run packages may land under `promoted/` for CI packaging, but they are stamped **`DRY_RUN_NOT_MOE_READY`**. Do not treat dry-run promotion as weight-level specialization.
+Dry-run packages are stamped **`DRY_RUN_NOT_MOE_READY`**. Do not treat dry-run promotion as weight-level specialization.
 
 ---
 
 ## Expert Group Studio & forensics
 
 ```bash
-aetherforge groups --preview --family deepseek_v4_flash --num-groups 12
-aetherforge forensics --family deepseek_v4_flash --num-groups 12 --markdown
+aetherforge groups --preview --family generic_moe --num-groups 12
+aetherforge forensics --family generic_moe --num-groups 12 --markdown
 aetherforge dashboard   # themes: NEXUS · MATRIX · PLASMA · AURORA
 ```
 
@@ -153,17 +142,19 @@ Industry content lives only in **domain packs** (never hard-coded in the trainer
 
 ---
 
-## DeepSeek-V4-Flash-0731
+## Fused-expert MoEs
+
+Many modern MoEs store routed experts as **fused parameter banks** rather than a simple ModuleList of MLPs. AetherForge applies PEFT `target_parameters` plus expert-index grad masks so routed capacity is trainable—not only shared experts.
 
 ```bash
 aetherforge validate-flash
-aetherforge train -c configs/base.yaml -c configs/deepseek_v4_flash.yaml \
+aetherforge train -c configs/base.yaml -c configs/<moe_family_profile>.yaml \
   -c recipes/flagship_flash_domain.yaml --dry-run
 ```
 
-Flash uses **fused** expert banks (`gate_up_proj` / `down_proj` 3D). AetherForge applies PEFT `target_parameters` + expert-index grad masks. Plain `target_modules` alone only hits **shared** experts. See [docs/guides/flash-0731.md](docs/guides/flash-0731.md).
+Optional YAML family *profiles* under `configs/` illustrate common shapes; the product itself is **any open MoE** you can describe in capacity + PEFT config. See [docs/guides/flash-0731.md](docs/guides/flash-0731.md) for the fused-expert PEFT pattern.
 
-**Hardware:** multi-GPU PEFT is the path (e.g. **2×96 GB = 192 GB** is a strong target). Full bf16 Adam on all ~284B params is not.
+**Hardware:** multi-GPU PEFT is the realistic path for large MoEs. Full bf16 Adam over every parameter of a frontier-scale sparse model is not the product goal.
 
 ---
 
@@ -172,15 +163,15 @@ Flash uses **fused** expert banks (`gate_up_proj` / `down_proj` 3D). AetherForge
 | Stage | Output |
 |-------|--------|
 | diagnostics | model summary |
-| data | train/eval + fingerprint (+ mix_paths) |
-| affinity | routing probe + selection (**synthetic watermark** on dry-run) |
-| groups | sectors + **sector_forensics** + readiness |
-| esft | sequential sector wave or joint adapter checkpoint |
+| data | train/eval + fingerprint |
+| affinity | routing probe + selection |
+| groups | sectors + forensics + readiness |
+| esft | sequential sector wave or joint adapter |
 | router_hygiene | router calibration |
-| preference | THD / pairs |
+| preference | preference / THD pairs |
 | lifecycle | elastic expert plan |
 | scorecard | CI vs MoE labels |
-| package | AetherPackage (+ promoted/ with honesty stamps) |
+| package | AetherPackage (+ promote stamps) |
 
 ---
 
@@ -192,8 +183,6 @@ aetherforge groups | forensics | dashboard | runs | status | recipes | init | qu
 aetherforge connect | remote
 aetherforge scorecard | package | consult
 ```
-
-Full reference: [docs/reference/cli.md](docs/reference/cli.md)
 
 ---
 
@@ -215,37 +204,17 @@ aetherforge remote pull && aetherforge remote logs --tail 80
 
 | Doc | Description |
 |-----|-------------|
-| **[Complete guide](docs/GUIDE.md)** | What / why / setup / run / utilize / hardware / possibilities |
+| **[Complete guide](docs/GUIDE.md)** | What / why / setup / run / utilize / hardware |
 | **[Product explanation](docs/product.md)** | Thorough product deep-dive |
 | **[GitHub Pages](https://AetherAwareness.github.io/aetherforge/)** | User guide site |
 | [Getting started](docs/getting-started.md) | Install & first dry-run |
 | [Architecture](docs/architecture.md) | Pipeline & MoE concepts |
 | [Studio & forensics](docs/guides/studio.md) | Lattice + sector dossiers |
-| [Flash-0731](docs/guides/flash-0731.md) | Fused experts & PEFT |
+| [Fused-expert PEFT](docs/guides/flash-0731.md) | Fused banks & PEFT pattern |
 | [Postures](docs/guides/postures.md) | specialist / broad / wide |
 | [Safety](docs/safety.md) | High-stakes & privacy |
 | [Commercial use](COMMERCIAL.md) | What is / is not monetizable |
 | [Changelog](docs/changelog.md) | Versions |
-
----
-
-## Repository layout
-
-```text
-aetherforge/
-├── configs/           # base, flash, a3b, domain templates
-├── recipes/           # flagship, broad, wide, dryrun
-├── packs/             # optional domain packs
-├── aetherforge/       # Python package
-├── docs/              # GitHub Pages + product.md
-├── scripts/           # install, desktop, demo capture
-├── tests/             # unit + integration + red-team fidelity
-├── README.md
-├── HF_README.md
-├── CONTRIBUTING.md
-├── SECURITY.md
-└── LICENSE
-```
 
 ---
 
@@ -259,8 +228,6 @@ eval:
     domain_depth_min: 0.65
 ```
 
-Generic promote gate — not a field-specific code path. See [docs/safety.md](docs/safety.md).
-
 ---
 
 ## Development
@@ -270,16 +237,14 @@ pip install -e ".[dev]"
 pytest tests/ -q
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
-
 ---
 
 ## Limits (read this)
 
 - **Dry-run ≠ trained MoE.** Synthetic affinity and CI scorecards prove the factory, not weight-level specialization.  
-- **Live Flash / multi-GPU PEFT** is the real train path; full 284B bf16 is not.  
-- **Domain packs** supply industry content — the core never hard-codes medicine/finance/etc.  
-- Secrets and credentials belong in `~/.aetherforge/`, never in the repo.
+- **Live multi-GPU PEFT** is the real train path for large sparse models.  
+- **Domain packs** supply industry content — the core never hard-codes a field.  
+- Secrets belong in `~/.aetherforge/`, never in the repo.
 
 ---
 

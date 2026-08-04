@@ -25,7 +25,7 @@ See the lattice, carve sectors, and know **what each sector contains** before yo
 |------|---------|
 | **Cell** | One `(layer, expert_index)` slot |
 | **Sector / group** | Named set of cells with train/freeze + data binding |
-| **Active fire** | Params that typically fire in one forward (~13B Flash / ~3B A3B) |
+| **Active fire** | Params that typically fire in one forward (~one active fire for the model family) |
 | **Fire×** | Sector expert mass ÷ one active fire |
 
 ---
@@ -34,10 +34,10 @@ See the lattice, carve sectors, and know **what each sector contains** before yo
 
 ```bash
 # Flash-scale: how many ~13B sectors?
-aetherforge groups --preview --family deepseek_v4_flash --num-groups 12
+aetherforge groups --preview --family generic_moe --num-groups 12
 
-# A3B-scale: ~3B sectors
-aetherforge groups --preview --family qwen_a3b --num-groups 8
+# compact MoE: sectors near one active fire
+aetherforge groups --preview --family generic_moe --num-groups 8
 ```
 
 ---
@@ -105,8 +105,8 @@ Before binding data, inventory each sector:
 
 ```bash
 # Markdown inventory
-aetherforge forensics --family deepseek_v4_flash \
-  --model deepseek-ai/DeepSeek-V4-Flash-0731 \
+aetherforge forensics --family generic_moe \
+  --model <your-open-moe-checkpoint> \
   --num-groups 12 --markdown
 
 # After a run (routing-aware if affinity.json exists)

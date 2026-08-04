@@ -81,7 +81,7 @@ nav_order: 7
 
 ## 0.2.4
 
-- DeepSeek-V4-Flash-0731 native PEFT (`target_parameters`, grad masks)  
+- fused-expert MoE profile native PEFT (`target_parameters`, grad masks)  
 - `aetherforge validate-flash`  
 - Flash config + recipes  
 

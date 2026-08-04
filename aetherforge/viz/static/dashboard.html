@@ -1330,8 +1330,8 @@ function renderStudio(b) {
     return `<div class="sub">No expert groups yet — run groups stage or flagship dry-run.
       <div class="studio-tools" style="margin-top:10px">
         <select class="sel" id="previewFamily">
-          <option value="deepseek_v4_flash">DeepSeek-V4-Flash (~13B)</option>
-          <option value="qwen_a3b">Qwen A3B (~3B)</option>
+          <option value="deepseek_v4_flash">Large MoE (~active-fire sectors)</option>
+          <option value="qwen_a3b">Compact MoE (~active-fire sectors)</option>
         </select>
         <input type="number" id="previewN" value="8" min="1" max="32" />
         <button class="primary" id="btnPreviewGroups">Preview sectors</button>
@@ -2014,7 +2014,7 @@ async function loadProviders() {
               <option value="together">Together</option>
               <option value="fireworks">Fireworks</option>
               <option value="groq">Groq</option>
-              <option value="deepseek">DeepSeek</option>
+              <option value="openai_compat">OpenAI-compatible</option>
             </select>
             <input type="password" id="llmKey" placeholder="API key" style="flex:1" />
             <button class="primary" id="btnConnectLlm">Connect</button>

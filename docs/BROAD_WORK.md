@@ -2,7 +2,7 @@
 
 AetherForge is not only a one-sector specialist tool. Three **postures** control how much of the MoE lattice and how much data you update.
 
-| Posture | Expert coverage | Sectors | Data | 2×96 GB Flash |
+| Posture | Expert coverage | Sectors | Data | multi-GPU large-MoE PEFT |
 |---------|-----------------|---------|------|----------------|
 | **specialist** | top‑k / one domain | selected groups | single domain | easy |
 | **broad** | ~25–35% slots | top‑N sectors (e.g. 6/12) | multi-domain + mix_paths | **sweet spot** |
@@ -40,16 +40,16 @@ data:
 
 ```bash
 # Broad (recommended for “general capability” on 192GB)
-aetherforge train -c configs/base.yaml -c configs/deepseek_v4_flash.yaml \
+aetherforge train -c configs/base.yaml -c configs/<moe_family_profile>.yaml \
   -c recipes/broad_flash_192gb.yaml --dry-run
 
 # Wide lattice LoRA (still PEFT)
-aetherforge train -c configs/base.yaml -c configs/deepseek_v4_flash.yaml \
+aetherforge train -c configs/base.yaml -c configs/<moe_family_profile>.yaml \
   -c recipes/wide_flash_192gb.yaml --dry-run
 
 # Vast
 aetherforge remote launch --exec -c configs/base.yaml \
-  -c configs/deepseek_v4_flash.yaml -c recipes/broad_flash_192gb.yaml
+  -c configs/<moe_family_profile>.yaml -c recipes/broad_flash_192gb.yaml
 ```
 
 Desktop **⬢ AetherForge** menu includes these recipes under training recipe pick.

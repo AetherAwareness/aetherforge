@@ -25,7 +25,7 @@ Quick path from zero to a dry-run pipeline and the Training Console.
 | Python | **3.10+** (3.11 / 3.12 tested in CI) |
 | OS | Linux recommended (macOS often works for dry-run / dashboard) |
 | GPU | Optional for dry-run; **required** for live train |
-| Disk | Models vary — Flash-0731 full safetensors ≈ **160 GB+** |
+| Disk | Models vary — fused-expert profile full safetensors ≈ **160 GB+** |
 | Network | Hugging Face for configs / optional weight download |
 
 ---
@@ -60,7 +60,7 @@ pip install -U pip wheel
 pip install -e ".[dev]"
 ```
 
-Optional Unsloth path (A3B speed; Flash uses PEFT):
+Optional Unsloth path (optional speed paths; fused banks use PEFT target_parameters):
 
 ```bash
 pip install -e ".[unsloth]"
@@ -101,7 +101,7 @@ Nothing industry-specific is hard-coded in the trainer core — only **domain pa
 
 ---
 
-## Flash-0731 stack check
+## fused-expert profile stack check
 
 ```bash
 aetherforge validate-flash
@@ -118,7 +118,7 @@ Proves transformers config, weight index layout, PEFT `target_parameters`, and m
 ```bash
 aetherforge train \
   -c configs/base.yaml \
-  -c configs/deepseek_v4_flash.yaml \
+  -c configs/<moe_family_profile>.yaml \
   -c recipes/broad_flash_192gb.yaml \
   --dry-run
 ```
@@ -147,5 +147,5 @@ CLI:
 
 - [Architecture]({% link architecture.md %}) — stages and modules  
 - [Studio & forensics]({% link guides/studio.md %}) — edit sectors  
-- [Flash-0731]({% link guides/flash-0731.md %}) — live multi-GPU train  
+- [fused-expert profile]({% link guides/flash-0731.md %}) — live multi-GPU train  
 - [Postures]({% link guides/postures.md %}) — specialist / broad / wide  

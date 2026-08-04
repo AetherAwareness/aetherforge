@@ -44,14 +44,14 @@ aetherforge connect status
 ```bash
 # 1) Preview (no spend)
 aetherforge remote plan -c configs/base.yaml \
-  -c configs/deepseek_v4_flash.yaml -c recipes/broad_flash_192gb.yaml
+  -c configs/<moe_family_profile>.yaml -c recipes/broad_flash_192gb.yaml
 
 # 2) Rsync code (excludes .venv, artifacts, .git)
 aetherforge remote sync
 
 # 3) Launch — default: nohup background on the box
 aetherforge remote launch --exec -c configs/base.yaml \
-  -c configs/deepseek_v4_flash.yaml -c recipes/broad_flash_192gb.yaml
+  -c configs/<moe_family_profile>.yaml -c recipes/broad_flash_192gb.yaml
 
 # Foreground (blocks SSH for the whole job)
 aetherforge remote launch --exec --foreground …
@@ -100,7 +100,7 @@ aetherforge connect openrouter --model "openrouter/auto"
 aetherforge consult "Tradeoffs of multi-sector PEFT" --llm --specialists a,b,c
 ```
 
-Supported: OpenRouter, OpenAI, Together, Fireworks, Groq, DeepSeek, custom OpenAI-compatible.
+Supported: OpenRouter, OpenAI, Together, Fireworks, Groq, and other OpenAI-compatible APIs.
 
 ---
 

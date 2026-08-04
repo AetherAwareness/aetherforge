@@ -25,8 +25,8 @@ Dense models update (roughly) all parameters each step.
 
 | Family | Total (approx) | Active fire | Routed experts | Top‑k |
 |--------|----------------|-------------|----------------|-------|
-| DeepSeek-V4-Flash-0731 | ~284B | ~**13B** | 256 × 43 layers | 6 |
-| Qwen A3B-class | ~30–35B | ~**3B** | family-dependent | 8-ish |
+| fused-expert MoE profile | frontier-scale total parameter counts | ~**13B** | 256 × 43 layers | 6 |
+| Compact open MoE | medium | ~active fire | family-dependent | top-k |
 
 AetherForge sizes **sectors** relative to one active fire so operators can reason:
 
@@ -76,7 +76,7 @@ Implemented in `utils.config.apply_posture_defaults`, `affinity.expert_selector`
 
 ---
 
-## DeepSeek-V4 fused experts
+## Fused expert banks
 
 Disk weights use paths like `layers.N.ffn.experts.E.w{1,2,3}`.  
 Runtime modules are `model.layers.N.mlp.experts` with:
@@ -92,14 +92,14 @@ PEFT **ParamWrapper** attaches multi-expert LoRA; AetherForge installs **grad ma
 
 ```
 aetherforge/
-├── configs/          # base, flash, a3b, domain templates
+├── configs/          # base, family profiles, domain templates
 ├── recipes/          # flagship, broad, wide, dryrun
 ├── packs/            # optional domain packs
 ├── aetherforge/        # Python package
 │   ├── affinity/
 │   ├── data/
 │   ├── groups/       # studio + forensics
-│   ├── models/       # loaders, deepseek_v4, moe_utils
+│   ├── models/       # loaders, family adapters, moe_utils
 │   ├── providers/    # vast, runpod, ssh, remote_train
 │   ├── training/     # pipeline, esft, scorecard hooks
 │   └── viz/          # dashboard

@@ -4,8 +4,8 @@
 
 Primary model targets:
 
-- DeepSeek-V4-Flash-class (284B total / ~13B active)
-- Qwen3.x / A3B-series (~30–35B total / ~3B active)
+- large fused-expert MoEs (high total / thin active fire)
+- compact sparse MoEs (smaller active fire)
 
 ## Core principle
 
@@ -54,8 +54,8 @@ Source order: pack file → inline config → generic scaffolds (never field-spe
 
 ## Roadmap
 
-1. MVP generic dry-run + pack-driven A3B specialist *(current)*  
-2. Live A3B on vast with real corpora  
-3. Flash multi-node  
+1. MVP generic dry-run + pack-driven specialist *(current)*  
+2. Live MoE train on rented GPUs with real corpora  
+3. Large MoE multi-node  
 4. Multi-specialist hive across packs for one industry  
 5. Openveil federated continuous updates  

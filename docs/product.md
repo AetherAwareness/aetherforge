@@ -22,7 +22,7 @@ A thorough description of what AetherForge is, who it is for, how the factory wo
 
 **AetherForge is a MoE-native post-training factory:** it carves open sparse models into train-able expert *sectors*, forensically inventories what each sector is (with honest evidence tiers), builds sector-bound datasets under data contracts, trains adapters (ESFT/LoRA) with specialist or broad postures, and promotes gated **AetherPackages** with scorecards that distinguish CI completeness from MoE reliability.
 
-It is **not** a chat UI, not a dense-model SFT script, and not a claim that dry-run equals a fully specialized Flash-class model.
+It is **not** a chat UI, not a dense-model SFT script, and not a claim that dry-run equals a fully specialized production MoE.
 
 ---
 
@@ -30,12 +30,12 @@ It is **not** a chat UI, not a dense-model SFT script, and not a claim that dry-
 
 | Audience | Why they care |
 |----------|----------------|
-| **Labs / operators** training open MoEs (DeepSeek-V4 Flash-class, Qwen A3B-class) | Need expert-aware PEFT, not dense-style fine-tunes that miss fused experts |
-| **Product teams** building domain specialists (logistics, ops, code, …) | Domain packs supply industry content without welding it into the trainer |
-| **Platform builders** (e.g. Aether Awareness) | Reproducible config-as-code, audit logs, promote gates, remote Vast/RunPod path |
+| **Labs / operators** training open sparse MoEs | Expert-aware PEFT, not dense-style fine-tunes that miss routed capacity |
+| **Product teams** building domain specialists | Domain packs supply industry content without welding it into the trainer |
+| **Platform builders** | Reproducible config-as-code, audit logs, promote gates, remote GPU path |
 | **Researchers** studying expert modularity | Sector forensics, affinity probes, interference summaries, keep/rollback |
 
-**Not for:** people who only need a Hugging Face Trainer one-liner on a dense 7B; or anyone expecting a single CLI flag to fully retrain 284B in bf16 on a laptop.
+**Not for:** people who only need a Hugging Face Trainer one-liner on a dense small model; or anyone expecting a single CLI flag to full-bf16-retrain a frontier-scale sparse model on a laptop.
 
 ---
 
@@ -43,8 +43,8 @@ It is **not** a chat UI, not a dense-model SFT script, and not a claim that dry-
 
 Sparse MoEs hide capacity:
 
-- Only top‑k experts fire per token (~3B active on A3B, ~13B on Flash).  
-- DeepSeek-V4 Flash stores **fused** expert banks (3D `gate_up_proj` / `down_proj`) — PEFT `target_modules` alone often only hits *shared* MLPs.  
+- Only top‑k experts fire per token (thin active slice vs large total parameter count).  
+- Many modern MoEs store **fused** expert banks — PEFT `target_modules` alone often only hits *shared* MLPs.  
 - Operators cannot see which experts they are editing, so generic FT either wastes compute or destroys generality.
 
 AetherForge’s answer is a **control plane** (sectors, forensics, contracts, scorecards) around a **training plane** (ESFT/LoRA + optional full-expert masks).
@@ -54,12 +54,13 @@ AetherForge’s answer is a **control plane** (sectors, forensics, contracts, sc
 ## 4. Product principles
 
 1. **MoE-native** — amplify expert modularity; do not pretend dense.  
-2. **Industry-agnostic core** — domain packs are fuel; no hard-coded field tables in Python.  
-3. **Honesty over hype** — evidence tiers, synthetic watermarks, dry-run ≠ MoE ready.  
-4. **Progressive & reversible** — freeze plans, staged unfreeze, sector keep/rollback.  
-5. **Measurable gates** — quality, readiness, scorecard, human approve for high-stakes.  
-6. **Reproducible** — config-as-code, seeds, dataset fingerprints, plan fingerprints, audit JSONL.  
-7. **Hardware-aware** — multi-GPU PEFT path; remote Vast/RunPod; no fantasy full-bf16 284B product.
+2. **Model-agnostic open MoEs** — works across open sparse architectures you can describe in config (module-list or fused banks).  
+3. **Industry-agnostic core** — domain packs are fuel; no hard-coded field tables in Python.  
+4. **Honesty over hype** — evidence tiers, synthetic watermarks, dry-run ≠ MoE ready.  
+5. **Progressive & reversible** — freeze plans, staged unfreeze, sector keep/rollback.  
+6. **Measurable gates** — quality, readiness, scorecard, human approve for high-stakes.  
+7. **Reproducible** — config-as-code, seeds, fingerprints, audit JSONL.  
+8. **Hardware-aware** — multi-GPU PEFT path; remote rentals; no fantasy full-bf16 of every parameter.
 
 ---
 
@@ -69,73 +70,28 @@ AetherForge’s answer is a **control plane** (sectors, forensics, contracts, sc
 Domain pack + corpora
         │
         ▼
-┌───────────────┐
-│  DataForge    │  curate · synthesize · quality gates · fingerprint
-└───────┬───────┘
+   DataForge  →  Affinity probe  →  Expert Group Studio (forensics + plan freeze)
+        │
         ▼
-┌───────────────┐
-│ Affinity probe│  routing / selection (live or synthetic dry-run)
-└───────┬───────┘
+   Sector wave (dataset · pre-probe · ESFT · post-probe · keep/rollback)
+        │
         ▼
-┌───────────────┐
-│ Expert Group  │  carve lattice → sectors; forensics + readiness
-│ Studio        │  plan freeze (immutable fingerprint)
-└───────┬───────┘
-        ▼
-┌───────────────┐
-│ Sector wave   │  per sector: dataset contract → pre-probe → ESFT → post-probe
-│ (sequential)  │  keep/rollback · interference summary
-└───────┬───────┘
-        ▼
-┌───────────────┐
-│ Router hygiene│  preference / THD · lifecycle plan
-└───────┬───────┘
-        ▼
-┌───────────────┐
-│ Scorecard     │  CI completeness vs MoE reliability labels
-└───────┬───────┘
-        ▼
-┌───────────────┐
-│ AetherPackage │  export · optional promote/ (stamped honesty)
-└───────────────┘
+   Router hygiene · preference · lifecycle · scorecard · AetherPackage
 ```
 
-Optional: **Training Console** (`aetherforge dashboard`) visualizes runs, lattice paint, Sector Forge timeline, affinity, scorecard, operator approve/reject/force-promote.
+Optional: **Training Console** visualizes runs, lattice paint, Sector Forge timeline, affinity, scorecard, operator approve/reject/force-promote.
 
 ---
 
 ## 6. Expert sectors
 
-A **sector** is a named set of `(layer, expert_index)` cells with:
+A **sector** is a named set of `(layer, expert_index)` cells with train/freeze flags, optional domain bindings, and capacity vs one **active fire** (Fire×).
 
-- train / freeze / enabled flags  
-- optional domain, topics, keywords, curated_path, domain_pack  
-- capacity estimate vs one **active fire** (Fire×)
-
-Strategies for auto-carve include `active_slots`, `affinity`, `layer_bands`, `round_robin`.  
-`groups.train_scope` selects who receives gradients: `selected`, `top_n`, `all_enabled`, `all`.
-
-**Postures** set how wide the update is:
-
-| Posture | Intent |
-|---------|--------|
-| specialist | Few sectors / experts, one domain |
-| broad | Many experts + multi-sector + multi-corpus (default sweet spot on 2×96GB Flash) |
-| wide | Near-lattice LoRA; still PEFT by default |
+**Postures:** specialist · broad · wide — how wide the update is, not which vendor built the base model.
 
 ---
 
 ## 7. Sector forensics & evidence tiers
-
-Before training a sector, AetherForge inventories:
-
-- **Mass** — estimated expert params vs one active fire  
-- **Structure** — layer span, early/mid/late role  
-- **Content** — themes, assigned domain/topics/keywords  
-- **Distinctiveness** — overlap with siblings  
-- **Edit guide** — split/merge/bind/freeze recommendations  
-
-### Evidence tiers (critical honesty layer)
 
 | Tier | When | Content themes |
 |------|------|----------------|
@@ -143,18 +99,7 @@ Before training a sector, AetherForge inventories:
 | `assignment` | Domain/topics/keywords/curated bound | Calibrated competitive scores |
 | `routing_probed` | Affinity matrix present | Calibrated; **synthetic** matrices cannot claim high confidence |
 
-**Anti-hallucination rules:**
-
-- Unbound geometry must not saturate multi-theme scores to ~1.0.  
-- Auto-bind may set a **domain slug** from a global domain for dry-run convenience, but **must not paint multi-theme keywords** from zero-score structure_only dossiers.  
-- Theme topics/keywords only from themes with score ≥ threshold (default 0.2).
-
-CLI:
-
-```bash
-aetherforge forensics --family deepseek_v4_flash --num-groups 12 --markdown
-aetherforge forensics --plan artifacts/runs/RUN/expert_groups.json --affinity affinity.json
-```
+Auto-bind may set a domain slug for dry-run convenience but **must not paint multi-theme keywords** from zero-score structure_only dossiers.
 
 ---
 
@@ -162,61 +107,20 @@ aetherforge forensics --plan artifacts/runs/RUN/expert_groups.json --affinity af
 
 Default `training.sector_mode: sequential`:
 
-1. **Plan freeze** — `plan_fingerprint` / `plan_freeze.json`; membership edits mid-wave fail closed  
-2. Forensics + readiness gate (`warn` | `block` | `skip`)  
-3. Per-sector datasets (soft-assign + optional shared mix + synth fill)  
-4. **Data contracts** — min samples, min real fraction, max synth fraction, uniqueness  
-5. Pre-probe sector routing mass  
-6. ESFT on that sector only (`selection_for_group`)  
-7. Post-probe → **keep** or **rollback**  
-8. Interference summary for sibling regressions  
+1. Plan freeze (immutable fingerprint)  
+2. Forensics + readiness gate  
+3. Per-sector datasets + data contracts  
+4. Pre-probe → ESFT → post-probe → keep/rollback  
+5. Interference summary  
 
-Joint mode (`sector_mode: joint`) remains for legacy single-pass ESFT over all selected experts.
-
-Config knobs (see `configs/base.yaml`):
-
-```yaml
-training:
-  sector_mode: sequential
-  sector_min_samples: 8
-  sector_shared_fraction: 0.15
-  sector_probe_enabled: true
-  sector_probe_min_delta: -0.02
-  sector_keep_rollback: true
-  sector_contract_mode: warn   # block | warn | off
-  sector_min_real_fraction: 0.15
-  sector_max_synth_fraction: 0.85
-  sector_min_unique_ratio: 0.35
-groups:
-  require_forensics_gate: true
-  forensics_gate_mode: warn
-  auto_bind_from_forensics: true
-```
+Joint mode remains for single-pass ESFT over all selected experts.
 
 ---
 
 ## 9. DataForge & domain packs
 
-**DataForge** builds industry-agnostic corpora:
-
-- curated JSON/JSONL + optional `mix_paths`  
-- synthetic self-instruct from **DomainPack** topics/keywords/actions  
-- trajectory hive (stub or LLM) for preference pairs  
-- quality gates (length, dedupe, toxicity, diversity)  
-- content fingerprint for audit  
-
-**Domain packs** (`configs/domains/_template.yaml`, `example_logistics.yaml`) supply:
-
-- `domain`, `topics`, `keywords`, `actions`  
-- optional specialists, populations, contexts, high_stakes  
-- real `curated_path` when available  
-
-The trainer never embeds medicine/finance/etc. keyword tables in core Python.
-
-```bash
-aetherforge init my_field --posture broad
-aetherforge data -c configs/base.yaml -c configs/domains/my_field.yaml --sectors --dry-run
-```
+Industry-agnostic corpora: curated + synthetic + quality gates + fingerprints.  
+**Domain packs** supply topics/keywords/actions/curated paths — never hard-coded industry tables in core Python.
 
 ---
 
@@ -224,115 +128,56 @@ aetherforge data -c configs/base.yaml -c configs/domains/my_field.yaml --sectors
 
 | Method | Role |
 |--------|------|
-| `esft_lora` | Default — LoRA on selected experts (Flash: `target_parameters` + grad masks) |
-| `qlora` | Quantized LoRA path when configured |
-| `full_esft` | Unfreeze selected expert params (V4 slice masks) |
-| `bar_merge` | Experimental merge posture |
+| `esft_lora` | Default — LoRA on selected experts (fused banks use `target_parameters` + masks) |
+| `qlora` | Quantized LoRA when configured |
+| `full_esft` | Unfreeze selected expert params with masks |
 
-**Flash-0731 note:** fused experts require peft ≥ 0.15 and careful dropout (often 0). `aetherforge validate-flash` proves config/PEFT/weight-map trainability without a full product train.
-
-Specialization and load-balance losses are available as weighted auxiliaries. Router can start frozen and be lightly calibrated in the hygiene stage.
+`aetherforge validate-flash` proves fused-expert PEFT stack trainability without a full product train.
 
 ---
 
 ## 11. Scorecard & promotion
-
-After training (or dry-run), the **Reliability Scorecard** evaluates proxies:
-
-- domain / structure / general text proxies from pack keywords  
-- routing entropy & load-balance CV from affinity  
-- optional LM loss when a model is loaded  
-- sector wave metrics when sequential workflow ran  
-
-### Scorecard kinds
 
 | Kind | Meaning |
 |------|---------|
 | `ci_completeness` | Pipeline + data + proxies OK (includes dry-run) |
 | `moe_reliability` | Live model + non-synthetic affinity (+ healthy sector keep when wave ran) |
 
-Dry-run **never** sets `full_moe_promoted_readiness`. Packages promoted under dry-run include:
-
-- `promoted/DRY_RUN_NOT_MOE_READY.txt`  
-- `promoted/PROMOTION_KIND.json` with `promoted_kind: ci_dry_run`  
-
-High-stakes domains can require human approval via the dashboard before promote.
+Dry-run **never** sets full MoE promoted readiness. Packages include honesty stamps under dry-run.
 
 ---
 
 ## 12. Remote training
 
-Operators connect compute (Vast.ai, RunPod, SSH box) and LLM APIs (OpenRouter-style) via:
-
 ```bash
 aetherforge connect vast --host HOST --port PORT
-aetherforge remote plan -c … 
-aetherforge remote launch --exec -c …
-aetherforge remote pull && aetherforge remote logs --tail 80
+aetherforge remote launch --exec --recipe broad-flash
+aetherforge remote pull
 ```
 
-Credentials live under `~/.aetherforge/` (gitignored). Desktop launcher can drive the same path for non-CLI users.
+Credentials live under `~/.aetherforge/` (gitignored).
 
 ---
 
-## 13. Training Console (dashboard)
+## 13. What “success” means
 
-`aetherforge dashboard` serves a local Neural Command UI:
+**In-repo / dry-run:** full pipeline completes with fingerprints, forensics tiers, contracts, scorecard; tests green; dry-run promotion clearly labeled CI only.
 
-- Mission run list + live stage spine  
-- **Sector Forge** bay — timeline, readiness, dataset shards, orbit canvas  
-- Expert Group Studio — lattice paint, forensics inventory  
-- Affinity heatmap, scorecard meters, event stream  
-- Operator controls: approve / reject / force promote  
-- Themes: NEXUS · MATRIX · PLASMA · AURORA  
-
-Live status schema includes sector wave telemetry (`sectors.*`, visual hero labels) for poll-based updates.
+**Production:** live affinity on a loaded open MoE, sequential PEFT with measured post-sector routing deltas, `moe_reliability` scorecard, human approve when high-stakes.
 
 ---
 
-## 14. What “success” means
+## 14. What we deliberately do not claim
 
-### In-repo / dry-run success (always available)
-
-- Full pipeline completes with fingerprints, forensics tiers, contracts, scorecard  
-- Tests green (`pytest tests/ -q`) including red-team fidelity suite  
-- Dry-run promotion clearly labeled as CI only  
-
-### Production success (requires GPU + weights)
-
-- Live affinity probes on a loaded model  
-- Sequential PEFT on Flash or A3B with measured post-sector routing deltas  
-- `moe_reliability` scorecard pass and human-approved promote for high-stakes  
-
-AetherForge is designed so the **factory** is correct before the **furnace** is lit.
-
----
-
-## 15. What we deliberately do not claim
-
-- Dry-run synthetic affinity is **not** knowledge of what experts contain.  
-- Theme banks are **not** a product taxonomy of the world.  
+- Dry-run synthetic affinity is not knowledge of what experts contain.  
+- Theme banks are not a product taxonomy of the world.  
 - Sequential sector training without live weights is orchestration + honesty, not proven specialization.  
-- Full 284B bf16 retrain is **out of product scope**.  
-- No industry is privileged in core code — packs only.
+- Full bf16 retrain of every parameter in a frontier-scale MoE is out of product scope.  
+- No industry and no single vendor model is privileged in core code.
 
 ---
 
-## 16. Roadmap posture
-
-Shipped toward:
-
-1. Live multi-theme affinity forensics on real models  
-2. Adapter composition policy across sequential PEFT passes  
-3. Golden Vast multi-sector Flash run with published scorecard  
-4. Pack↔sector binding recipes for multi-specialist hives  
-5. Remote resume of interrupted sector waves  
-
-See [BUILD_STATUS.md](BUILD_STATUS.md) and [changelog.md](changelog.md).
-
----
-
-## 17. Getting started (pointer)
+## 15. Getting started
 
 ```bash
 git clone https://github.com/AetherAwareness/aetherforge.git
@@ -342,7 +187,7 @@ aetherforge train --recipe dryrun --dry-run
 aetherforge dashboard
 ```
 
-Read next: [getting-started.md](getting-started.md) · [architecture.md](architecture.md) · [guides/studio.md](guides/studio.md) · [safety.md](safety.md)
+See also [GUIDE.md](GUIDE.md) · [getting-started.md](getting-started.md) · [architecture.md](architecture.md)
 
 ---
 

@@ -36,7 +36,7 @@ nav_sort: case_insensitive
 back_to_top: true
 back_to_top_text: "Back to top"
 
-footer_content: 'AetherForge · © 2026 AetherAwareness · PolyForm Noncommercial · MoE post-training for Flash-class & A3B models'
+footer_content: 'AetherForge · © 2026 AetherAwareness · PolyForm Noncommercial · MoE post-training for open sparse MoE models'
 
 gh_edit_link: true
 gh_edit_link_text: "Edit this page on GitHub"

@@ -19,7 +19,7 @@ What fits specialist, broad, and wide PEFT — vs full-weight train.
 
 ---
 
-## Flash-0731 memory intuition
+## Large fused-expert MoE memory intuition
 
 | Object | Order of magnitude |
 |--------|-------------------|
@@ -41,7 +41,7 @@ What fits specialist, broad, and wide PEFT — vs full-weight train.
 | Flash ESFT/LoRA specialist | Excellent |
 | Flash **broad** multi-sector | **Sweet spot** |
 | Flash **wide** lattice LoRA | Feasible (batch 1, checkpointing) |
-| Full bf16 retrain 284B | **No** |
+| Full bf16 retrain of frontier-scale MoEs | **No** |
 
 Settings:
 
@@ -64,10 +64,10 @@ Not for Flash full load. Use dry-run, forensics, dashboard, and remote train on 
 
 ---
 
-## A3B-class
+## Compact MoE class
 
-Qwen A3B-class often fits **1–2×24–48 GB** with QLoRA/Unsloth.  
-Use `configs/qwen_a3b.yaml` + `recipes/flagship_logistics_a3b.yaml`.
+Compact MoEs often fit **1–2×24–48 GB** with QLoRA/Unsloth.  
+Use `configs/<moe_family_profile>.yaml` + `recipes/flagship specialist recipe.yaml`.
 
 ---
 

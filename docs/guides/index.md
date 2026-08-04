@@ -8,4 +8,4 @@ permalink: /guides/
 
 # Guides
 
-Task-oriented documentation for Studio, Flash-0731, postures, hardware, and remote train.
+Task-oriented documentation for Studio, fused-expert profile, postures, hardware, and remote train.

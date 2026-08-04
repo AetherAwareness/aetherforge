@@ -29,7 +29,7 @@ nav_order: 3
 | Attention LoRA | optional | on | on |
 | Expert grad masks | on | on | **off** |
 | Steps (typical) | 100–500 | 800–1500 | 1500–3000 |
-| 2×96 GB Flash | easy | **sweet spot** | heavier |
+| multi-GPU large-MoE PEFT | easy | **sweet spot** | heavier |
 
 All three still default to **PEFT/ESFT-LoRA** on the full safetensors checkpoint.
 
@@ -67,11 +67,11 @@ Setting only `training.posture` applies sensible defaults via `apply_posture_def
 
 ```bash
 # Broad (recommended general capability on 192GB)
-aetherforge train -c configs/base.yaml -c configs/deepseek_v4_flash.yaml \
+aetherforge train -c configs/base.yaml -c configs/<moe_family_profile>.yaml \
   -c recipes/broad_flash_192gb.yaml --dry-run
 
 # Wide lattice LoRA
-aetherforge train -c configs/base.yaml -c configs/deepseek_v4_flash.yaml \
+aetherforge train -c configs/base.yaml -c configs/<moe_family_profile>.yaml \
   -c recipes/wide_flash_192gb.yaml --dry-run
 ```
 
