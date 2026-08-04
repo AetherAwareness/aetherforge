@@ -18,7 +18,6 @@ Carve open **Mixture-of-Experts** checkpoints into visual **expert sectors**, fo
 |---|---|
 | **Code** | [github.com/AetherAwareness/aetherforge](https://github.com/AetherAwareness/aetherforge) |
 | **Download** | [Releases](https://github.com/AetherAwareness/aetherforge/releases) (source zip/tarball) |
-| **Related** | [Aether Constellation](https://github.com/AetherAwareness/aether-constellation) |
 | **Complete guide** | [docs/GUIDE.md](docs/GUIDE.md) — setup, run, utilize, all postures |
 | **How-to cookbook** | [docs/HOWTO.md](docs/HOWTO.md) — task recipes |
 | **Product deep-dive** | [docs/product.md](docs/product.md) |

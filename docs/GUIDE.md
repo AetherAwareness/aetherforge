@@ -254,9 +254,7 @@ Dashboard: Approve / Reject / Force promote.
 
 ## 14. Sister tools
 
-| Tool | Repo | Role |
-|------|------|------|
-| **Aether Constellation** | [aether-constellation](https://github.com/AetherAwareness/aether-constellation) | Live service nerve-map + TCP probes — [GUIDE](https://github.com/AetherAwareness/aether-constellation/blob/main/docs/GUIDE.md) |
+No separate public sister repos are published with this release. AetherForge is standalone for MoE post-training.
 
 ## 15. Next reading
 

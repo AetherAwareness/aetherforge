@@ -112,7 +112,7 @@ Then open `aetherforge dashboard` → Approve / Reject / Force promote.
 
 1. Convert/quantize adapter to your serving format (e.g. GGUF) as you prefer  
 2. Serve with your usual local stack (llama-server, Ollama, vLLM, etc.)  
-3. Optionally map ports on [Aether Constellation](https://github.com/AetherAwareness/aether-constellation)  
+ 
  
 
 ## Tests
