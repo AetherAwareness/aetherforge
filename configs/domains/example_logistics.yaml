@@ -1,0 +1,51 @@
+# EXAMPLE only — shows how any non-medical industry is configured.
+# Copy/adapt; do not treat as a required pack.
+
+data:
+  domain: logistics
+  description: "Multi-echelon supply chain, inventory, and transport risk"
+  topics:
+    - multi-echelon inventory under lead-time shock
+    - port congestion rerouting and mode shift
+    - cold-chain break detection
+    - carrier capacity vs SLA tradeoffs
+    - warehouse labor surge planning
+    - customs delay cascade on SKU availability
+  keywords:
+    - inventory
+    - logistics
+    - lead-time
+    - warehouse
+    - carrier
+    - sla
+    - supply
+    - transport
+    - congestion
+    - sku
+  actions:
+    - Map single points of failure in the tier-2 supplier graph.
+    - Quantify stockout cost vs expedite cost under current lead times.
+    - Propose a mode-shift plan with ETA confidence bands.
+    - Trigger safety-stock recalculation for critical SKUs.
+  synthetic:
+    enabled: true
+    num_samples: 500
+    trajectory_hive: true
+
+affinity:
+  top_k_experts: 16
+
+training:
+  max_steps: 200
+
+eval:
+  scorecard_thresholds:
+    domain_score: 0.65
+    high_stakes: false
+    require_human_approval: false
+
+hive:
+  specialists: [logistics, procurement, network_ops]
+
+run:
+  name: logistics-specialist

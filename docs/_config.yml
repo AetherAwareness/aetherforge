@@ -1,0 +1,75 @@
+# AetherForge documentation — GitHub Pages (Just the Docs)
+# Enable: Settings → Pages → Deploy from branch → /docs
+# Or use .github/workflows/pages.yml
+
+title: AetherForge
+description: Reliable post-training for open sparse MoE models — Expert Group Studio, sector forensics, Vast train
+# GitHub Pages: remote_theme works without bundling the gem in the repo.
+# Local: `cd docs && bundle install && bundle exec jekyll serve` (see Gemfile).
+remote_theme: just-the-docs/just-the-docs@v0.10.1
+
+url: https://AetherAwareness.github.io
+baseurl: /aetherforge
+
+permalink: pretty
+search_enabled: true
+search:
+  heading_level: 3
+  previews: 3
+  preview_words_before: 5
+  preview_words_after: 10
+
+heading_anchors: true
+color_scheme: dark
+
+aux_links:
+  "GitHub":
+    - "https://github.com/AetherAwareness/aetherforge"
+  "Hugging Face":
+    - "https://huggingface.co/AetherAwareness/aetherforge"
+  "Report issue":
+    - "https://github.com/AetherAwareness/aetherforge/issues"
+
+aux_links_new_tab: true
+
+nav_sort: case_insensitive
+back_to_top: true
+back_to_top_text: "Back to top"
+
+footer_content: 'AetherForge · MIT License · MoE post-training for Flash-class & A3B models'
+
+gh_edit_link: true
+gh_edit_link_text: "Edit this page on GitHub"
+gh_edit_repository: "https://github.com/AetherAwareness/aetherforge"
+gh_edit_branch: "main"
+gh_edit_source: docs
+gh_edit_view_mode: "tree"
+
+callouts_level: quiet
+callouts:
+  highlight:
+    color: blue
+  important:
+    title: Important
+    color: yellow
+  new:
+    title: New
+    color: green
+  warning:
+    title: Warning
+    color: red
+  note:
+    title: Note
+    color: purple
+
+plugins:
+  - jekyll-seo-tag
+  - jekyll-include-cache
+
+exclude:
+  - BUILD_STATUS.md
+  - DIRECTIVE.md
+  - demo/frames/
+  - Gemfile
+  - Gemfile.lock
+  - vendor/

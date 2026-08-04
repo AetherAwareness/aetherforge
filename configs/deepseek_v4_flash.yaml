@@ -1,0 +1,79 @@
+# DeepSeek-V4-Flash-0731 (284B total / ~13B active) — multi-GPU / PEFT-first
+# Flash-0731 is a re-post-train of Flash-preview; same architecture (deepseek_v4).
+#
+# Critical training facts (verified against transformers DeepseekV4ForCausalLM):
+#   - Routed experts are fused 3D params on DeepseekV4Experts:
+#       gate_up_proj [256, 4096, 4096], down_proj [256, 4096, 2048]
+#   - NOT ModuleList of MLP experts — PEFT target_modules alone misses routed experts
+#   - AetherForge uses target_parameters + expert-index grad masks (ESFT)
+#   - PEFT ParamWrapper requires lora_dropout: 0 for fused params
+#
+# Prove stack:  aetherforge validate-flash
+# Dry pipeline: aetherforge train -c configs/base.yaml -c configs/deepseek_v4_flash.yaml --dry-run
+# Live GPU:     aetherforge remote launch ... --exec   (Vast/RunPod multi-GPU)
+model:
+  name: "deepseek-ai/DeepSeek-V4-Flash-0731"
+  family: deepseek_v4_flash
+  load_in_4bit: false
+  expert_parallel: true
+  tensor_parallel: 1
+  max_seq_length: 8192
+  dtype: bfloat16
+  trust_remote_code: true
+  # Confirmed architecture (HF config + transformers 5.14 DeepseekV4Config)
+  num_experts: 256
+  num_experts_per_tok: 6
+  num_shared_experts: 1
+
+training:
+  method: esft_lora
+  backend: peft          # PEFT target_parameters path (required for fused experts)
+  lora_r: 64
+  lora_alpha: 128
+  # MUST be 0 for DeepSeek-V4 ParamWrapper (enforced in apply_v4_expert_lora)
+  lora_dropout: 0.0
+  # Shared-expert Linears (DeepseekV4MLP under shared_experts)
+  target_modules:
+    - gate_proj
+    - up_proj
+    - down_proj
+  # Routed fused expert banks — PEFT LoraConfig(target_parameters=...)
+  target_parameters:
+    - gate_up_proj
+    - down_proj
+  max_steps: 500
+  per_device_train_batch_size: 1
+  gradient_accumulation_steps: 32
+  learning_rate: 1.0e-4
+  router_learning_rate: 2.0e-5
+  router_hygiene_steps: 200
+  specialization_loss_weight: 0.12
+  gradient_checkpointing: true
+  stages: [sft, router_hygiene, preference]
+
+affinity:
+  probe_size: 1024
+  top_k_experts: 32
+  progressive_unfreeze: true
+  use_gradient_contribution: true
+  mitosis_overload_threshold: 2.5
+
+groups:
+  enabled: true
+  target_num_groups: 12
+  target_active_fire_ratio: 1.0
+  strategy: active_slots
+  use_for_training: true
+  total_params_b: 284
+  active_params_b: 13
+
+eval:
+  scorecard_thresholds:
+    domain_score: 0.78
+    general_delta_max: -0.04
+    routing_entropy_min: 1.5
+    load_balance_cv_max: 1.8
+    hallucination_max: 0.10
+
+run:
+  name: deepseek-v4-flash-0731-specialist

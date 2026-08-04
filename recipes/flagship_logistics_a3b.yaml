@@ -1,0 +1,120 @@
+# Flagship live recipe — logistics specialist on Qwen A3B-class MoE
+#
+# Dry-run (no GPU / no model download):
+#   aetherforge train -c configs/base.yaml -c recipes/flagship_logistics_a3b.yaml --dry-run
+#
+# Live (GPU + model weights; local or Vast):
+#   aetherforge train -c configs/base.yaml -c configs/qwen_a3b.yaml -c recipes/flagship_logistics_a3b.yaml
+#   # or: bash scripts/run_flagship.sh live
+#
+# Remote:
+#   aetherforge connect vast --host … --port …
+#   aetherforge remote plan -c configs/base.yaml -c configs/qwen_a3b.yaml -c recipes/flagship_logistics_a3b.yaml
+#   aetherforge remote launch --exec -c configs/base.yaml -c configs/qwen_a3b.yaml -c recipes/flagship_logistics_a3b.yaml
+#   aetherforge remote pull && aetherforge remote logs
+
+model:
+  name: "Qwen/Qwen3-30B-A3B"
+  family: qwen_a3b
+  load_in_4bit: true
+  max_seq_length: 4096
+
+data:
+  domain: logistics
+  description: "Flagship multi-echelon logistics & inventory risk specialist"
+  curated_path: data/samples/logistics/train.jsonl
+  eval_path: data/samples/logistics/eval.jsonl
+  topics:
+    - multi-echelon inventory under lead-time shock
+    - port congestion mode shift
+    - cold-chain break response
+    - carrier capacity vs SLA
+    - warehouse labor surge
+    - customs delay cascade
+    - supplier single-point failure
+    - stockout vs expedite economics
+  keywords:
+    - inventory
+    - logistics
+    - lead-time
+    - warehouse
+    - carrier
+    - sla
+    - supply
+    - stockout
+    - expedite
+    - congestion
+    - safety stock
+    - otif
+  actions:
+    - Map single points of failure in the tier-2 supplier graph.
+    - Quantify stockout cost vs expedite cost under current lead times.
+    - Propose a mode-shift plan with ETA confidence bands.
+    - Trigger safety-stock recalculation for critical SKUs.
+    - Protect SLA lanes with targeted capacity, not blanket peak rates.
+  synthetic:
+    enabled: true
+    num_samples: 200          # live: raise to 2000+
+    trajectory_hive: true
+  quality_gates:
+    min_diversity: 0.45
+    min_length: 64
+  curriculum: true
+  privacy_mode: local
+  seed: 42
+
+affinity:
+  probe_size: 128
+  top_k_experts: 24
+  progressive_unfreeze: true
+  use_gradient_contribution: false   # set true on live GPU if VRAM allows
+  freeze_router_initially: true
+
+groups:
+  enabled: true
+  target_num_groups: 6
+  target_active_fire_ratio: 1.0
+  strategy: affinity
+  use_for_training: true
+  # Optional: bind sample data into sector_1 after first groups stage via Studio,
+  # or set plan_path to a pre-edited expert_groups.json
+  # plan_path: artifacts/flagship/expert_groups.json
+
+training:
+  method: esft_lora
+  backend: auto
+  lora_r: 32
+  lora_alpha: 64
+  learning_rate: 1.5e-4
+  num_epochs: 1.0
+  max_steps: 80                 # live starter; raise for quality
+  per_device_train_batch_size: 1
+  gradient_accumulation_steps: 8
+  specialization_loss_weight: 0.12
+  load_balance_loss_weight: 0.01
+  stages: [sft, router_hygiene, preference]
+  router_hygiene_steps: 40
+  output_dir: artifacts/runs
+  save_steps: 40
+  logging_steps: 5
+  seed: 42
+  gradient_checkpointing: true
+
+eval:
+  scorecard_thresholds:
+    domain_score: 0.55
+    general_delta_max: -0.08
+    routing_entropy_min: 0.8
+    load_balance_cv_max: 2.5
+    hallucination_max: 0.20
+    require_human_approval: false
+    high_stakes: false
+  num_eval_samples: 64
+  stress_test: true
+  auto_rollback: true
+
+run:
+  name: flagship-logistics-a3b
+  project: aetherforge-flagship
+  tracking: json
+  dry_run: false

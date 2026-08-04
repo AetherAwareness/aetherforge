@@ -1,0 +1,71 @@
+# AetherForge domain pack TEMPLATE — copy this for ANY industry/field.
+#
+# Usage:
+#   cp configs/domains/_template.yaml configs/domains/my_field.yaml
+#   # edit domain / topics / keywords / actions
+#   aetherforge train -c configs/base.yaml -c configs/domains/my_field.yaml
+#
+# OR point data.domain_pack at a standalone pack file:
+#   aetherforge train -c configs/base.yaml -o data.domain_pack=packs/logistics.yaml
+#
+# The trainer core has ZERO hard-coded industry knowledge.
+# Everything field-specific lives here (or in curated corpora).
+
+data:
+  domain: my_field                    # slug: logistics, securities_law, energy_trading, …
+  description: "One-line description of this specialty"
+  # Optional external pack file (YAML/JSON). Inline fields below override the pack.
+  # domain_pack: packs/my_field.yaml
+
+  # Core content for synthetic generation + domain_score keywords
+  topics:
+    - first core problem area for this field
+    - second recurring decision class
+    - third edge-case / failure mode
+    - fourth high-frequency workflow
+  keywords:
+    - fieldterm1
+    - fieldterm2
+    - fieldterm3
+  actions:
+    - First concrete next action a specialist would take.
+    - Second measurement or check to run.
+    - Escalation or stop condition.
+  # Optional framing axes (defaults are generic if omitted)
+  # populations: [operators, analysts, executives]
+  # contexts: [planning cycle, incident response]
+  # angles: [cost, risk, resilience]
+
+  synthetic:
+    enabled: true
+    num_samples: 2000
+    trajectory_hive: true
+  privacy_mode: local                 # local | federated | open
+  # curated_path: /path/to/real_corpus.jsonl   # preferred for production
+
+affinity:
+  top_k_experts: 16
+  probe_size: 512
+
+training:
+  method: esft_lora
+  max_steps: 300
+
+eval:
+  scorecard_thresholds:
+    domain_score: 0.70
+    general_delta_max: -0.05
+    routing_entropy_min: 1.0
+    hallucination_max: 0.12
+    # Optional deeper competence axis (any industry)
+    # domain_depth_min: 0.65
+    # Set true for regulated / high-impact fields (health, finance, legal, safety, …)
+    high_stakes: false
+    require_human_approval: false
+
+hive:
+  specialists: [my_field, my_field_reviewer, generalist]
+  consult_protocol: debate
+
+run:
+  name: my-field-specialist

@@ -1,0 +1,77 @@
+# Virtual envs & Python
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Local training artifacts (never publish runs/weights)
+artifacts/
+**/artifacts/runs/
+*.pt
+*.pth
+*.bin
+*.gguf
+*.safetensors
+*.onnx
+*.ckpt
+*.h5
+
+# Secrets & local operator config
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.yaml
+~/.aetherforge/
+.aetherforge/
+.hiveforge/
+
+# Experiment trackers
+wandb/
+mlflow/
+runs/
+lightning_logs/
+
+# Docs site build
+docs/_site/
+docs/.jekyll-cache/
+docs/.sass-cache/
+docs/vendor/
+docs/Gemfile.lock
+docs/demo/frames/
+
+# IDE / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Caches & logs
+*.log
+.cache/
+tmp/
+temp/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Desktop / local launcher noise
+*.desktop
+!scripts/*.desktop

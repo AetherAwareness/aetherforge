@@ -1,0 +1,67 @@
+# Industry-agnostic end-to-end dry-run (no GPU weights).
+# Domain content comes only from inline topics/keywords — not hard-coded fields.
+#
+#   aetherforge train -c configs/base.yaml -c recipes/generic_dryrun.yaml --dry-run
+
+model:
+  name: "Qwen/Qwen3-30B-A3B"
+  family: qwen_a3b
+
+data:
+  domain: demo_field
+  description: "Generic specialty used only to exercise the trainer"
+  topics:
+    - prioritization under conflicting goals
+    - root-cause analysis of process failure
+    - calibration of confidence with incomplete evidence
+    - tradeoff analysis under resource constraints
+    - failure-mode anticipation and recovery planning
+    - detecting contradictions across sources
+  keywords:
+    - prioritization
+    - root-cause
+    - evidence
+    - tradeoff
+    - failure
+    - recovery
+    - confidence
+    - process
+  actions:
+    - State assumptions and the decision owner explicitly.
+    - List competing hypotheses with discriminators.
+    - Define a reversible next measurement.
+    - Document stop conditions and escalation triggers.
+  synthetic:
+    enabled: true
+    num_samples: 64
+    trajectory_hive: true
+
+affinity:
+  probe_size: 32
+  top_k_experts: 8
+  use_gradient_contribution: false
+
+groups:
+  enabled: true
+  target_num_groups: 6
+  strategy: active_slots
+  use_for_training: true
+
+training:
+  max_steps: 10
+  router_hygiene_steps: 5
+  output_dir: artifacts/runs
+
+eval:
+  scorecard_thresholds:
+    domain_score: 0.35
+    routing_entropy_min: 0.5
+    load_balance_cv_max: 5.0
+    hallucination_max: 0.5
+    require_human_approval: false
+    high_stakes: false
+    domain_depth_min: null
+
+run:
+  name: generic-dryrun
+  dry_run: true

@@ -1,0 +1,75 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aetherforge"
+version = "0.5.0"
+description = "MoE-native post-training factory: Expert Group Studio, sector forensics, sequential ESFT, data contracts, gated AetherPackages"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "AetherForge contributors" }]
+keywords = [
+  "moe", "mixture-of-experts", "post-training", "esft", "lora",
+  "deepseek", "qwen", "fine-tuning", "expert-groups", "dashboard",
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Science/Research",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+urls = { Homepage = "https://github.com/AetherAwareness/aetherforge", Documentation = "https://AetherAwareness.github.io/aetherforge/", Repository = "https://github.com/AetherAwareness/aetherforge", "Bug Tracker" = "https://github.com/AetherAwareness/aetherforge/issues" }
+dependencies = [
+  "torch>=2.2",
+  "transformers>=4.50",
+  "peft>=0.15",
+  "accelerate>=0.30",
+  "datasets>=2.19",
+  "omegaconf>=2.3",
+  "hydra-core>=1.3",
+  "pydantic>=2.6",
+  "numpy>=1.26",
+  "scipy>=1.11",
+  "tqdm>=4.66",
+  "rich>=13.7",
+  "pyyaml>=6.0",
+  "safetensors>=0.4",
+  "huggingface_hub>=0.23",
+  "sentencepiece>=0.2",
+  "protobuf>=4.25",
+  "jsonlines>=4.0",
+  "scikit-learn>=1.4",
+]
+
+[project.optional-dependencies]
+unsloth = ["unsloth"]
+deepspeed = ["deepspeed"]
+vllm = ["vllm"]
+tracking = ["wandb", "mlflow"]
+dev = ["pytest>=8.0", "pytest-cov", "ruff", "mypy"]
+all = ["aetherforge[unsloth,deepspeed,vllm,tracking,dev]"]
+
+[project.scripts]
+aetherforge = "aetherforge.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["aetherforge*"]
+
+[tool.setuptools.package-data]
+aetherforge = ["viz/static/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"

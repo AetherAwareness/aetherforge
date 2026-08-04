@@ -1,0 +1,141 @@
+# AetherForge base recipe — safe defaults for A3B-class iteration
+model:
+  name: "Qwen/Qwen3-30B-A3B"
+  family: auto
+  load_in_4bit: true
+  trust_remote_code: true
+  expert_parallel: false
+  max_seq_length: 4096
+  dtype: bfloat16
+
+data:
+  domain: general
+  curated_path: null
+  synthetic:
+    enabled: true
+    num_samples: 500
+    trajectory_hive: true
+    self_instruct: true
+  quality_gates:
+    min_diversity: 0.65
+    max_toxicity: 0.05
+    factuality_threshold: 0.80
+    min_length: 48
+    max_length: 8192
+  curriculum: true
+  privacy_mode: local
+  seed: 42
+
+affinity:
+  probe_size: 256
+  top_k_experts: 16
+  progressive_unfreeze: true
+  use_gradient_contribution: false
+  freeze_router_initially: true
+  freeze_low_affinity: true
+  mitosis_overload_threshold: 3.0
+
+# Expert Group Studio — carve the MoE lattice into train-able sectors.
+# For Flash-class (~13B active), target_num_groups is how many ~active-scale
+# sectors you can call up and assign different data to.
+groups:
+  enabled: true
+  target_num_groups: 8
+  target_active_fire_ratio: 1.0
+  strategy: active_slots          # active_slots | affinity | layer_bands | round_robin
+  use_for_training: true          # ESFT trains only enabled+train sectors
+  plan_path: null                 # optional pre-edited expert_groups.json
+  total_params_b: null            # override e.g. 284 for Flash
+  active_params_b: null           # override e.g. 13 for Flash
+  # Pre-sector forensic readiness (what each sector contains before train)
+  require_forensics_gate: true
+  forensics_gate_mode: warn       # warn | block | skip
+  auto_bind_from_forensics: true  # fill empty domain/topics/keywords from themes
+  auto_bind_requires_theme_peak: 0.25
+
+training:
+  method: esft_lora
+  backend: auto
+  # sequential = forensics → sector dataset → ESFT per sector (recommended)
+  # joint      = one ESFT pass over all selected experts
+  sector_mode: sequential
+  sector_min_samples: 8
+  sector_shared_fraction: 0.15
+  sector_continue_on_block: true
+  sector_probe_enabled: true
+  sector_probe_min_delta: -0.02
+  sector_probe_dry_boost: 0.08
+  sector_keep_rollback: true
+  sector_contract_mode: warn      # block | warn | off
+  sector_min_real_fraction: 0.15
+  sector_max_synth_fraction: 0.85
+  sector_min_unique_ratio: 0.35
+  lora_r: 32
+  lora_alpha: 64
+  lora_dropout: 0.05
+  learning_rate: 2.0e-4
+  router_learning_rate: 5.0e-5
+  num_epochs: 1.0
+  max_steps: 100
+  per_device_train_batch_size: 1
+  gradient_accumulation_steps: 8
+  specialization_loss_weight: 0.1
+  load_balance_loss_weight: 0.01
+  stages: [sft, router_hygiene, preference]
+  router_hygiene_steps: 50
+  output_dir: artifacts/runs
+  save_steps: 50
+  logging_steps: 5
+  seed: 42
+  gradient_checkpointing: true
+
+eval:
+  scorecard_thresholds:
+    domain_score: 0.50
+    general_delta_max: -0.05
+    routing_entropy_min: 0.8
+    load_balance_cv_max: 2.5
+    hallucination_max: 0.15
+    safety_pass: true
+    require_human_approval: false
+    high_stakes: false
+    domain_depth_min: null
+  num_eval_samples: 64
+  stress_test: true
+  auto_rollback: true
+
+continuous:
+  enabled: false
+  update_frequency: daily
+  federated: false
+
+lifecycle:
+  enabled: true
+  util_low_threshold: 0.15
+  util_high_threshold: 3.0
+  allow_mitosis: true
+  allow_rebirth: true
+  allow_prune: false
+
+hive:
+  specialists: []
+  consult_protocol: debate
+  max_consult_rounds: 3
+  distill_after_consult: true
+
+# Remote compute (Vast/RunPod/SSH) + LLM APIs (OpenRouter/…) are configured via:
+#   aetherforge connect …
+# Secrets: ~/.aetherforge/credentials.yaml  Profiles: ~/.aetherforge/connections.yaml
+providers:
+  compute_profile: null
+  llm_profile: null
+  use_llm_for_synthetic: false
+  use_llm_for_thd: false
+  remote_dir: /workspace/aetherforge
+
+run:
+  name: aetherforge-base
+  project: aetherforge
+  tracking: json
+  dry_run: false
+  device: cuda

@@ -1,0 +1,67 @@
+# Flagship recipe — DeepSeek-V4-Flash-0731 domain specialist
+# Pair with configs/deepseek_v4_flash.yaml
+#
+#   aetherforge validate-flash
+#   aetherforge train -c configs/base.yaml -c configs/deepseek_v4_flash.yaml \
+#     -c recipes/flagship_flash_domain.yaml --dry-run
+#   aetherforge remote launch -c configs/base.yaml -c configs/deepseek_v4_flash.yaml \
+#     -c recipes/flagship_flash_domain.yaml --exec
+#
+# Swap data.domain / domain_pack for any industry. Nothing industry-hardcoded.
+
+data:
+  domain: logistics
+  description: "Route planning, inventory, last-mile, SLA recovery — industry pack only"
+  # Optional: domain_pack: packs/logistics.yaml
+  synthetic:
+    enabled: true
+    num_samples: 4000
+    trajectory_hive: true
+    self_instruct: true
+  quality_gates:
+    min_diversity: 0.55
+    min_length: 48
+  curriculum: true
+  privacy_mode: local
+  max_train_samples: 4000
+
+affinity:
+  probe_size: 512
+  top_k_experts: 48
+  progressive_unfreeze: true
+  freeze_router_initially: true
+
+groups:
+  enabled: true
+  target_num_groups: 12
+  target_active_fire_ratio: 1.0
+  strategy: active_slots
+  use_for_training: true
+  total_params_b: 284
+  active_params_b: 13
+
+training:
+  method: esft_lora
+  backend: peft
+  lora_r: 64
+  lora_alpha: 128
+  lora_dropout: 0.0
+  target_modules: [gate_proj, up_proj, down_proj]
+  target_parameters: [gate_up_proj, down_proj]
+  max_steps: 300
+  per_device_train_batch_size: 1
+  gradient_accumulation_steps: 32
+  learning_rate: 8.0e-5
+  stages: [diagnostics, data, affinity, groups, esft, router_hygiene, scorecard, package]
+
+eval:
+  num_eval_samples: 128
+  scorecard_thresholds:
+    domain_score: 0.72
+    general_delta_max: -0.05
+    routing_entropy_min: 1.2
+    load_balance_cv_max: 2.0
+    hallucination_max: 0.12
+
+run:
+  name: flagship-flash-0731-logistics

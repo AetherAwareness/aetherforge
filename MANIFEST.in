@@ -1,0 +1,14 @@
+include README.md
+include LICENSE
+include pyproject.toml
+include Makefile
+recursive-include aetherforge/viz/static *
+recursive-include configs *
+recursive-include recipes *
+recursive-include packs *
+recursive-include docs *
+recursive-include scripts *
+global-exclude __pycache__
+global-exclude *.py[cod]
+global-exclude .venv
+global-exclude artifacts

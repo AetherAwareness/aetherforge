@@ -1,0 +1,80 @@
+# Wide lattice LoRA on Flash-0731 — still PEFT, almost all experts trainable
+# (NOT full-weight bf16). Intended for 2×96GB with quant weights + checkpointing.
+#
+# posture: wide → no expert grad masks, train_scope=all, attention LoRA,
+#                 lower LR, more steps, router unfrozen for hygiene stage
+#
+# Use when you want broad capability shift across the MoE, not one niche sector.
+# Prefer broad_flash_192gb.yaml first; escalate to wide only if needed.
+
+training:
+  posture: wide
+  method: esft_lora
+  backend: peft
+  lora_r: 48
+  lora_alpha: 96
+  lora_dropout: 0.0
+  include_attention: true
+  mask_unselected_experts: false
+  max_steps: 2000
+  per_device_train_batch_size: 1
+  gradient_accumulation_steps: 48
+  learning_rate: 5.0e-5
+  specialization_loss_weight: 0.015
+  load_balance_loss_weight: 0.03
+  router_hygiene_steps: 500
+  stages: [diagnostics, data, affinity, groups, esft, router_hygiene, scorecard, package]
+
+affinity:
+  probe_size: 2048
+  top_k_fraction: 1.0
+  freeze_low_affinity: false
+  freeze_router_initially: false
+  progressive_unfreeze: true
+  multi_theme_probes: true
+
+groups:
+  enabled: true
+  target_num_groups: 12
+  train_scope: all
+  strategy: active_slots
+  use_for_training: true
+  total_params_b: 284
+  active_params_b: 13
+
+data:
+  domain: multi
+  description: "Wide multi-corpus mix for lattice-scale PEFT"
+  domains:
+    - aether_public
+    - logistics
+    - tools_agents
+    - product_ops
+    - code_software
+    - factual_world
+    - chat_social
+  mix_paths:
+    - /home/trinity/aether_data/training/public-aether-dataset.chat.jsonl
+  mix_max_per_source: 5000
+  curated_path: /home/trinity/aether_data/training/public-aether-dataset.chat.jsonl
+  eval_path: /home/trinity/aether_data/training/public-aether-eval.jsonl
+  synthetic:
+    enabled: true
+    num_samples: 12000
+    trajectory_hive: true
+  quality_gates:
+    min_diversity: 0.35
+    min_length: 32
+  max_train_samples: 25000
+  curriculum: true
+
+eval:
+  num_eval_samples: 320
+  scorecard_thresholds:
+    domain_score: 0.62
+    general_delta_max: -0.08
+    routing_entropy_min: 1.4
+    load_balance_cv_max: 2.5
+
+run:
+  name: wide-flash-0731-192gb
