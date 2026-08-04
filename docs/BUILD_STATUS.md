@@ -2,7 +2,7 @@
 
 ## Version
 
-**0.5.0** — **MoE fidelity** (evidence tiers, plan freeze, probe keep/rollback, data contracts, CI vs MoE scorecard) · Sector Forge visuals · sequential workflow · Flash-0731 PEFT
+**0.5.1** — **PolyForm Noncommercial** © AetherAwareness · complete GUIDE · MoE fidelity · Sector Forge · sequential workflow · Flash-0731 PEFT
 
 ## 0.4.0 — Sector-perfect training loop (2026-08-04)
 

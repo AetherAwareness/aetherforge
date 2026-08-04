@@ -346,4 +346,4 @@ Read next: [getting-started.md](getting-started.md) · [architecture.md](archite
 
 ---
 
-*AetherForge · MIT · AetherAwareness · MoE post-training factory for open sparse models.*
+*AetherForge · © 2026 AetherAwareness · PolyForm Noncommercial 1.0.0 · MoE post-training factory for open sparse models. Not free to monetize — see COMMERCIAL.md.*

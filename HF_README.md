@@ -15,10 +15,12 @@ tags:
   - peft
   - lora
   - esft
-license: mit
+license: other
 ---
 
 # AetherForge
+
+**Copyright © 2026 AetherAwareness** · **PolyForm Noncommercial 1.0.0** (free for noncommercial use; not free to monetize — see COMMERCIAL.md).
 
 **Downloadable MoE post-training tool** — carve sparse models into visual expert sectors, forensically inspect capacity, train specialist or **broad** adapters, promote gated AetherPackages.
 

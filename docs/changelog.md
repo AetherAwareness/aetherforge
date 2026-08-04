@@ -6,6 +6,13 @@ nav_order: 7
 
 # Changelog
 
+## 0.5.1 — Noncommercial license + complete guide
+
+- **License:** PolyForm Noncommercial 1.0.0 (© 2026 AetherAwareness) — free noncommercial use; monetization not granted  
+- **NOTICE** + **COMMERCIAL.md** for Required Notice and commercial inquiries  
+- **docs/GUIDE.md** — comprehensive setup, roles, utilization matrix, hardware targets  
+- GitHub Release artifacts for download  
+
 ## 0.5.0 — MoE training fidelity (no-weights)
 
 - **Evidence tiers:** `structure_only` · `assignment` · `routing_probed` with calibrated non-saturating themes  

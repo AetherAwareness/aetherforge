@@ -4,12 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "aetherforge"
-version = "0.5.0"
+version = "0.5.1"
 description = "MoE-native post-training factory: Expert Group Studio, sector forensics, sequential ESFT, data contracts, gated AetherPackages"
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT" }
-authors = [{ name = "AetherForge contributors" }]
+license = { text = "PolyForm Noncommercial License 1.0.0" }
+authors = [
+  { name = "AetherAwareness" },
+  { name = "AetherForge contributors" },
+]
 keywords = [
   "moe", "mixture-of-experts", "post-training", "esft", "lora",
   "deepseek", "qwen", "fine-tuning", "expert-groups", "dashboard",
@@ -18,7 +21,7 @@ classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Science/Research",
   "Intended Audience :: Developers",
-  "License :: OSI Approved :: MIT License",
+  "License :: Other/Proprietary License",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",

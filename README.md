@@ -2,21 +2,25 @@
 
 [![CI](https://github.com/AetherAwareness/aetherforge/actions/workflows/ci.yml/badge.svg)](https://github.com/AetherAwareness/aetherforge/actions/workflows/ci.yml)
 [![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://AetherAwareness.github.io/aetherforge/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm%20Noncommercial-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
-[![Version](https://img.shields.io/badge/version-0.5.0-informational.svg)](docs/changelog.md)
+[![Version](https://img.shields.io/badge/version-0.5.1-informational.svg)](docs/changelog.md)
+[![Download](https://img.shields.io/badge/download-GitHub%20Release-success.svg)](https://github.com/AetherAwareness/aetherforge/releases)
 
 **Reliable post-training for open sparse MoE models.**
 
 Carve DeepSeek-V4-Flash-class (~**13B active**) and Qwen A3B-class (~**3B active**) models into visual **expert sectors**, forensically inspect what each sector contains (with honest evidence tiers), train with **specialist / broad / wide** postures, enforce **per-sector data contracts**, promote gated **AetherPackages** — and never confuse dry-run CI completeness with weight-level MoE readiness.
 
-> **v0.5.0** — Evidence tiers · plan freeze · sector probe keep/rollback · data contracts · CI vs MoE scorecard · sequential sector workflow · Flash-0731 PEFT · Training Console
+> **v0.5.1** — PolyForm Noncommercial license · complete operator guide · evidence tiers · sequential sector workflow · Flash-0731 PEFT · Training Console  
+> **© 2026 AetherAwareness** — free for noncommercial use; **not free to monetize** ([COMMERCIAL.md](COMMERCIAL.md)).
 
 | | |
 |---|---|
 | **Code** | [github.com/AetherAwareness/aetherforge](https://github.com/AetherAwareness/aetherforge) |
-| **Product deep-dive** | [docs/product.md](docs/product.md) — full product explanation |
-| **User docs** | [AetherAwareness.github.io/aetherforge](https://AetherAwareness.github.io/aetherforge/) |
+| **Download** | [Releases](https://github.com/AetherAwareness/aetherforge/releases) (source zip/tarball) |
+| **Complete guide** | [docs/GUIDE.md](docs/GUIDE.md) — setup, run, utilize, all postures |
+| **Product deep-dive** | [docs/product.md](docs/product.md) |
+| **User docs site** | [AetherAwareness.github.io/aetherforge](https://AetherAwareness.github.io/aetherforge/) |
 | **HF card template** | [`HF_README.md`](HF_README.md) |
 
 ---
@@ -211,6 +215,7 @@ aetherforge remote pull && aetherforge remote logs --tail 80
 
 | Doc | Description |
 |-----|-------------|
+| **[Complete guide](docs/GUIDE.md)** | What / why / setup / run / utilize / hardware / possibilities |
 | **[Product explanation](docs/product.md)** | Thorough product deep-dive |
 | **[GitHub Pages](https://AetherAwareness.github.io/aetherforge/)** | User guide site |
 | [Getting started](docs/getting-started.md) | Install & first dry-run |
@@ -219,6 +224,7 @@ aetherforge remote pull && aetherforge remote logs --tail 80
 | [Flash-0731](docs/guides/flash-0731.md) | Fused experts & PEFT |
 | [Postures](docs/guides/postures.md) | specialist / broad / wide |
 | [Safety](docs/safety.md) | High-stakes & privacy |
+| [Commercial use](COMMERCIAL.md) | What is / is not monetizable |
 | [Changelog](docs/changelog.md) | Versions |
 
 ---
@@ -277,6 +283,17 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
-## License
+## License & copyright
 
-[MIT](LICENSE) © 2026 AetherForge contributors · published by [AetherAwareness](https://github.com/AetherAwareness)
+**Copyright © 2026 AetherAwareness.**
+
+AetherForge is licensed under the **[PolyForm Noncommercial License 1.0.0](LICENSE)**.
+
+| You may | You may not (without a commercial grant) |
+|---------|------------------------------------------|
+| Use, study, modify for **noncommercial** purposes | Sell AetherForge or a paid fork |
+| Share with license + Required Notice | Offer paid SaaS / managed train service built on it |
+| Research, education, hobby, public knowledge | Bundle into a commercial product for sale |
+
+See [NOTICE](NOTICE) and [COMMERCIAL.md](COMMERCIAL.md).  
+Trademark/names “AetherForge”, “AetherPackage”, “AetherAwareness” remain with AetherAwareness.

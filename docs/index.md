@@ -119,4 +119,4 @@ aetherforge remote launch --exec -c configs/base.yaml \
 
 ## License
 
-[MIT](https://github.com/AetherAwareness/aetherforge/blob/main/LICENSE) · © 2026 AetherForge contributors
+[PolyForm Noncommercial](https://github.com/AetherAwareness/aetherforge/blob/main/LICENSE) · © 2026 AetherAwareness
