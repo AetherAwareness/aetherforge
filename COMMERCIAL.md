@@ -35,9 +35,9 @@ If you need to:
 
 …you must obtain a **separate commercial license** from AetherAwareness.
 
-Open a GitHub issue tagged `commercial-license` on  
-https://github.com/AetherAwareness/aetherforge  
-or contact the maintainers through the AetherAwareness organization.
+Email **admin@aetherawareness.com** with subject `AetherForge commercial license`,  
+or open a GitHub issue tagged `commercial-license` on  
+https://github.com/AetherAwareness/aetherforge
 
 ## Trademark
 

@@ -191,4 +191,4 @@ See also [GUIDE.md](GUIDE.md) · [getting-started.md](getting-started.md) · [ar
 
 ---
 
-*AetherForge · © 2026 AetherAwareness · PolyForm Noncommercial 1.0.0 · MoE post-training factory for open sparse models. Not free to monetize — see COMMERCIAL.md.*
+*AetherForge · © 2026 AetherAwareness · PolyForm Noncommercial 1.0.0 · MoE post-training factory for open sparse models. Not free to monetize — see COMMERCIAL.md. Contact: admin@aetherawareness.com*

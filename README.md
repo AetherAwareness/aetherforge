@@ -262,3 +262,5 @@ AetherForge is licensed under the **[PolyForm Noncommercial License 1.0.0](LICEN
 
 See [NOTICE](NOTICE) and [COMMERCIAL.md](COMMERCIAL.md).  
 Trademark/names “AetherForge”, “AetherPackage”, “AetherAwareness” remain with AetherAwareness.
+
+**Contact:** [admin@aetherawareness.com](mailto:admin@aetherawareness.com)

@@ -242,11 +242,13 @@ Dashboard: Approve / Reject / Force promote.
 
 ---
 
-## 13. License
+## 13. License & contact
 
 - **Copyright:** © 2026 AetherAwareness  
 - **Public license:** PolyForm Noncommercial 1.0.0  
 - **Commercial monetization:** not granted — see COMMERCIAL.md  
+- **Contact:** [admin@aetherawareness.com](mailto:admin@aetherawareness.com)  
+
 
 ---
 

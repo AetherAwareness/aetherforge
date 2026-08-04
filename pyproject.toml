@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "PolyForm Noncommercial License 1.0.0" }
 authors = [
-  { name = "AetherAwareness" },
+  { name = "AetherAwareness", email = "admin@aetherawareness.com" },
   { name = "AetherForge contributors" },
 ]
 keywords = [

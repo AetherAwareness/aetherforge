@@ -24,6 +24,8 @@ We pledge to make participation in AetherForge a harassment-free experience for 
 
 Project maintainers may remove, edit, or reject comments, commits, code, wiki edits, issues, and other contributions that violate this Code of Conduct, and may ban contributors for behaviors they deem inappropriate, threatening, offensive, or harmful.
 
+Report CoC concerns to **admin@aetherawareness.com**.
+
 ## Scope
 
 This Code of Conduct applies within project spaces and in public spaces when an individual is representing the project.

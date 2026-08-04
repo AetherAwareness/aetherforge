@@ -12,7 +12,7 @@
 
 Please **do not** open a public issue for security-sensitive reports.
 
-1. Email the maintainers (replace with your contact), **or**  
+1. Email **admin@aetherawareness.com**, **or**  
 2. Use GitHub **Private vulnerability reporting** if enabled on the repository.
 
 Include:

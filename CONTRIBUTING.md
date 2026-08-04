@@ -4,6 +4,8 @@ Thanks for helping improve open MoE post-training tooling.
 
 **License:** contributions are accepted under the same **PolyForm Noncommercial License 1.0.0** as the project (© AetherAwareness). By opening a PR you agree your contribution is licensed under those terms. Commercial redistribution still requires a separate grant — see [COMMERCIAL.md](COMMERCIAL.md).
 
+**Contact:** [admin@aetherawareness.com](mailto:admin@aetherawareness.com)
+
 ## Development setup
 
 ```bash

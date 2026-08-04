@@ -84,4 +84,5 @@ AetherForge does **not** auto-rent Vast instances from the UI.
 
 ## Security reporting
 
-See [SECURITY.md](https://github.com/AetherAwareness/aetherforge/blob/main/SECURITY.md) in the repository root.
+See [SECURITY.md](https://github.com/AetherAwareness/aetherforge/blob/main/SECURITY.md) in the repository root.  
+Security and rights contact: **admin@aetherawareness.com**
