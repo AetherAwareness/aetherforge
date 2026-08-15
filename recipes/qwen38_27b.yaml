@@ -1,0 +1,25 @@
+# Named recipe overlay: Qwen3.8-27B dense PEFT (Vast).
+# Pair with configs/qwen38_27b.yaml via --recipe qwen38-27b
+#
+# Live train belongs on a rented GPU. Local dry-run is the smoke path.
+
+data:
+  domain: general
+  description: "Dense PEFT on official Qwen3.8-27B HF weights (not sparse ESFT)"
+  synthetic:
+    enabled: true
+    num_samples: 128
+    trajectory_hive: true
+
+eval:
+  scorecard_thresholds:
+    domain_score: 0.40
+    routing_entropy_min: 0.0
+    load_balance_cv_max: 99.0
+    hallucination_max: 0.25
+    require_human_approval: false
+    high_stakes: false
+
+run:
+  name: qwen38-27b-dense
+  dry_run: true

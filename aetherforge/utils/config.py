@@ -12,7 +12,9 @@ from pydantic import BaseModel, Field, field_validator
 
 class ModelConfig(BaseModel):
     name: str = "Qwen/Qwen3-30B-A3B"
-    family: Literal["auto", "deepseek_v4_flash", "qwen_a3b", "generic_moe"] = "auto"
+    family: Literal[
+        "auto", "deepseek_v4_flash", "qwen_a3b", "qwen38_dense", "generic_moe"
+    ] = "auto"
     load_in_4bit: bool = False
     load_in_8bit: bool = False
     trust_remote_code: bool = True
@@ -83,6 +85,8 @@ class DataConfig(BaseModel):
     sector_datasets: bool = True
     # Soft-assign threshold when partitioning global corpus → sectors
     sector_min_match: float = 0.18
+    # Pack-owned eval cases (dicts matching PackBenchmark). Inline override of pack file.
+    benchmarks: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class AffinityConfig(BaseModel):
@@ -232,6 +236,8 @@ class ScorecardThresholds(BaseModel):
     # High-stakes industries: require human promote (finance, health, legal, etc.)
     require_human_approval: bool = False
     high_stakes: bool = False
+    # Optional pack-eval gate (None = record score, do not fail)
+    pack_eval_min: Optional[float] = None
 
 
 class EvalConfig(BaseModel):

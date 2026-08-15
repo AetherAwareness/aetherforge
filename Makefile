@@ -1,4 +1,4 @@
-.PHONY: help install doctor test dryrun flagship flagship-live broad status quickstart init data validate lint clean dashboard demo recipes
+.PHONY: help install doctor test dryrun flagship flagship-live broad status quickstart init data validate lint clean dashboard demo recipes eval
 
 PYTHON ?= .venv/bin/python
 PIP ?= .venv/bin/pip
@@ -18,6 +18,7 @@ help:
 	@echo "  make dashboard    - Training Console"
 	@echo "  make data         - DataForge for example logistics domain"
 	@echo "  make validate     - config schema check"
+	@echo "  make eval         - pack-driven eval harness (dry-run)"
 	@echo "  make demo         - capture README/HF screenshots + gif/webm"
 	@echo "  make clean        - remove artifacts and caches"
 
@@ -70,6 +71,9 @@ validate:
 	$(PYTHON) -m aetherforge.cli validate \
 		-c configs/base.yaml \
 		-c configs/domains/example_logistics.yaml
+
+eval:
+	$(PYTHON) -m aetherforge.cli eval --recipe dryrun --dry-run
 
 lint:
 	$(PYTHON) -m ruff check aetherforge tests || true

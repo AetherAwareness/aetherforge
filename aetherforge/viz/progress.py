@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from aetherforge.utils.logging import get_logger
+from aetherforge.viz.run_store import public_path
 
 log = get_logger("viz.progress")
 
@@ -76,7 +77,7 @@ class LiveProgress:
             "domain": domain,
             "model": model,
             "dry_run": dry_run,
-            "run_dir": str(self.run_dir.resolve()),
+            "run_dir": str(public_path(self.run_dir)),
             "status": "starting",
             "promoted": False,
             "promote_blocked": None,
@@ -449,7 +450,7 @@ class LiveProgress:
     def _write_active_pointer(self) -> None:
         active = {
             "run_id": self.payload["run_id"],
-            "run_dir": str(self.run_dir.resolve()),
+            "run_dir": str(public_path(self.run_dir)),
             "status": self.payload["status"],
             "domain": self.payload["domain"],
             "updated_at": time.time(),

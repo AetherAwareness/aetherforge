@@ -43,6 +43,8 @@ def test_load_example_pack_via_domain_config():
     pack = resolve_domain_pack(cfg.data)
     assert pack.domain == "logistics"
     assert any("inventory" in t for t in pack.topics)
+    assert pack.benchmarks
+    assert any(b.id == "stockout_vs_expedite" for b in pack.benchmarks)
 
 
 def test_synthetic_uses_pack_not_hardcode():

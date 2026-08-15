@@ -6,6 +6,18 @@ nav_order: 7
 
 # Changelog
 
+## 0.5.2 — Pack eval, live THD, Qwen3.8 dense, live dashboard
+
+- **Pack-driven eval:** `DomainPack.benchmarks` + `aetherforge eval` + `pack_eval_score` on the scorecard (optional `pack_eval_min` gate)
+- **Live THD:** OpenAI-compat teacher via `providers.use_llm_for_thd` / `aetherforge thd --live` (skipped on dry-run)
+- **Multi-theme probes:** offline scores always; live AffinityProbe per theme when a bundle is loaded
+- **Dashboard SSE:** `GET /api/stream` EventSource, 2s poll fallback
+- **Qwen3.8-27B dense PEFT** profile + recipe `qwen38-27b` (Vast live; not sparse ESFT)
+- **Hermes skill** wrapping the CLI (`skills/hermes/SKILL.md`)
+- Public recipes no longer hard-code an operator home path; they use shipped `data/samples/`
+- CLI logs go to **stderr** so JSON on stdout is parseable
+- CI runs dry-run + pack-eval + recipe validate on 3.11 / 3.12
+
 ## 0.5.1 — Noncommercial license + complete guide
 
 - **License:** PolyForm Noncommercial 1.0.0 (© 2026 AetherAwareness) — free noncommercial use; monetization not granted  

@@ -344,9 +344,34 @@ class TrainingPipeline:
             json.dump(summary, f, indent=2)
         self.audit.record("diagnostics", "model_loaded", summary)
 
+    def _maybe_llm_fn(self):
+        """OpenAI-compat teacher if configured and not dry-run. None otherwise."""
+        if self.config.run.dry_run:
+            return None
+        if not (
+            self.config.providers.use_llm_for_thd
+            or self.config.providers.use_llm_for_synthetic
+        ):
+            return None
+        try:
+            from aetherforge.utils.llm_client import OpenAICompatClient, make_llm_fn_from_providers
+
+            client = OpenAICompatClient()
+            if client.available():
+                return make_llm_fn_from_providers()
+        except Exception as e:
+            log.info("LLM teacher unavailable: %s", e)
+        return None
+
     def _stage_data(self) -> None:
         log.info("Stage 1 — DataForge")
-        forge = DataForge(self.config.data, audit=self.audit)
+        llm_fn = self._maybe_llm_fn() if self.config.providers.use_llm_for_thd else None
+        forge = DataForge(
+            self.config.data,
+            audit=self.audit,
+            llm_fn=llm_fn,
+            live_thd=bool(llm_fn is not None),
+        )
         bundle = forge.build(output_dir=self.root / "data")
         self.state["stages"]["data"] = bundle.to_dict()
         self._data_bundle = bundle
@@ -416,6 +441,37 @@ class TrainingPipeline:
                 self.bundle, self.config.affinity, domain=self.config.data.domain
             )
             self.affinity = probe.run(probe_texts)
+
+        # Multi-theme scores (offline always; live only with a loaded bundle)
+        try:
+            from aetherforge.affinity.theme_probe import (
+                attach_theme_scores,
+                run_live_theme_probes,
+            )
+            from aetherforge.data.domain_pack import resolve_domain_pack
+
+            pack = resolve_domain_pack(self.config.data)
+            live_scores = None
+            if (
+                self.bundle is not None
+                and not self.config.run.dry_run
+                and self.config.affinity.multi_theme_probes
+            ):
+                live_scores = run_live_theme_probes(
+                    self.bundle, self.config.affinity, per_theme=2
+                )
+            attach_theme_scores(self.affinity, pack=pack, live_scores=live_scores)
+            theme_path = self.root / "theme_scores.json"
+            theme_path.write_text(
+                json.dumps(
+                    (self.affinity.metadata or {}).get("theme_scores") or {},
+                    indent=2,
+                    default=str,
+                ),
+                encoding="utf-8",
+            )
+        except Exception as e:
+            log.warning("theme probe attach failed: %s", e)
 
         with open(self.root / "affinity.json", "w", encoding="utf-8") as f:
             json.dump(self.affinity.to_dict(), f, indent=2)
@@ -905,6 +961,29 @@ class TrainingPipeline:
             ]
         out = self.root / "checkpoints" / "preference"
         aligner = PreferenceAligner(method="dpo")
+        # Live THD via OpenAI-compat — never on dry-run
+        if (
+            not self.config.run.dry_run
+            and self.config.providers.use_llm_for_thd
+        ):
+            llm_fn = self._maybe_llm_fn()
+            if llm_fn is not None:
+                seeds = [p.prompt for p in pairs[:16]] if pairs else []
+                if not seeds and data:
+                    seeds = [t[:400] for t in (data.eval_texts or [])[:8]]
+                if not seeds:
+                    seeds = [
+                        f"Hard case in {self.config.data.domain}: state assumptions, "
+                        "discriminators, and a reversible next step."
+                    ]
+                live_pairs = aligner.synthesize_live(
+                    seeds,
+                    llm_fn=llm_fn,
+                    domain=self.config.data.domain,
+                )
+                if live_pairs:
+                    pairs = list(pairs) + live_pairs
+                    log.info("preference: +%d live THD pairs", len(live_pairs))
         model = (
             self.bundle.model if self.bundle and not self.config.run.dry_run else None
         )
@@ -969,6 +1048,31 @@ class TrainingPipeline:
                     )
                 except Exception:
                     pass
+        pack_eval_payload = None
+        try:
+            from aetherforge.data.domain_pack import resolve_domain_pack
+            from aetherforge.eval.pack_eval import evaluate_pack, write_pack_eval
+
+            pack = resolve_domain_pack(self.config.data)
+            llm_fn = None
+            if not self.config.run.dry_run and pack.benchmarks:
+                llm_fn = self._maybe_llm_fn()
+            pe = evaluate_pack(
+                pack,
+                eval_texts=data.eval_texts if data else [],
+                llm_fn=llm_fn,
+                dry_run=self.config.run.dry_run,
+            )
+            write_pack_eval(pe, self.root / "pack_eval.json")
+            pack_eval_payload = pe.to_dict()
+            self.state["stages"]["pack_eval"] = {
+                "score": pe.score,
+                "n": pe.n,
+                "mode": pe.mode,
+            }
+        except Exception as e:
+            log.warning("pack_eval failed: %s", e)
+
         sc = scorecard.evaluate(
             model=self.bundle.model
             if self.bundle and not self.config.run.dry_run
@@ -982,6 +1086,7 @@ class TrainingPipeline:
             quality_report=quality,
             domain_keywords=keywords,
             sector_workflow=sector_wf,
+            pack_eval=pack_eval_payload,
         )
         self.final_scorecard = sc
         path = self.root / "scorecard.json"

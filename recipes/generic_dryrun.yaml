@@ -31,6 +31,15 @@ data:
     - List competing hypotheses with discriminators.
     - Define a reversible next measurement.
     - Document stop conditions and escalation triggers.
+  benchmarks:
+    - id: conflicting_goals
+      prompt: "Two goals conflict and resources are thin. State assumptions, pick a reversible next step, and name a stop condition."
+      must_include: [assumption, reversible, stop]
+      must_not_include: [guaranteed, infallible]
+    - id: root_cause
+      prompt: "A process failed twice this week. Outline competing hypotheses and what evidence would discriminate."
+      must_include: [hypothesis, evidence]
+      must_not_include: [zero risk]
   synthetic:
     enabled: true
     num_samples: 64

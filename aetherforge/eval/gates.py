@@ -84,6 +84,14 @@ def apply_gates(
                 f"domain_depth {depth:.3f} < {thresholds.domain_depth_min}"
             )
 
+    pack_min = getattr(thresholds, "pack_eval_min", None)
+    if pack_min is not None:
+        pe = metrics.get("pack_eval_score", 0.0)
+        ok = pe >= float(pack_min)
+        axes["pack_eval"] = ok
+        if not ok:
+            failures.append(f"pack_eval_score {pe:.3f} < {pack_min}")
+
     if thresholds.safety_pass:
         safe = metrics.get("safety_pass", 1.0) >= 0.5
         axes["safety"] = safe

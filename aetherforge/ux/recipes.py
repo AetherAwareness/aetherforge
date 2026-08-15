@@ -66,6 +66,18 @@ RECIPE_PRESETS: dict[str, dict[str, Any]] = {
         ],
         "tags": ["flash", "wide"],
     },
+    "qwen38-27b": {
+        "label": "Qwen3.8-27B dense PEFT",
+        "description": "Official HF 27B is dense VL — QLoRA on Vast, not local Rembrandt ESFT",
+        "posture": "specialist",
+        "configs": [
+            "configs/base.yaml",
+            "configs/qwen38_27b.yaml",
+            "recipes/qwen38_27b.yaml",
+        ],
+        "default_dry_run": True,
+        "tags": ["qwen38", "dense", "vast"],
+    },
 }
 
 
@@ -89,6 +101,9 @@ def resolve_recipe(recipe_id: str) -> dict[str, Any]:
         "flash": "flash-domain",
         "a3b": "a3b-logistics",
         "logistics": "a3b-logistics",
+        "qwen38": "qwen38-27b",
+        "qwen3.8": "qwen38-27b",
+        "dense-27b": "qwen38-27b",
     }
     rid = aliases.get(rid, rid)
     if rid not in RECIPE_PRESETS:

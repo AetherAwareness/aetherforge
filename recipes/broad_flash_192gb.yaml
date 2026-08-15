@@ -52,12 +52,14 @@ data:
     - tools_agents
     - product_ops
     - code_software
-  # Real corpora mixed in (paths resolved on the train host)
+  # Real corpora mixed in (paths resolved on the train host).
+  # Defaults ship with the sample logistics jsonl so a clone works without
+  # operator-local paths. Override with your own jsonl for a live train.
   mix_paths:
-    - /home/trinity/aether_data/training/public-aether-dataset.chat.jsonl
+    - data/samples/logistics/train.jsonl
   mix_max_per_source: 2000
-  curated_path: /home/trinity/aether_data/training/public-aether-dataset.chat.jsonl
-  eval_path: /home/trinity/aether_data/training/public-aether-eval.jsonl
+  curated_path: data/samples/logistics/train.jsonl
+  eval_path: data/samples/logistics/eval.jsonl
   synthetic:
     enabled: true
     num_samples: 6000

@@ -31,6 +31,12 @@ data:
     - First concrete next action a specialist would take.
     - Second measurement or check to run.
     - Escalation or stop condition.
+  # Pack-owned eval cases (drive `aetherforge eval` + scorecard pack_eval_score)
+  # benchmarks:
+  #   - id: case_one
+  #     prompt: "A hard decision in this field. State assumptions and a stop rule."
+  #     must_include: [assumption, stop]
+  #     must_not_include: [guaranteed, infallible]
   # Optional framing axes (defaults are generic if omitted)
   # populations: [operators, analysts, executives]
   # contexts: [planning cycle, incident response]

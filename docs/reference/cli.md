@@ -75,6 +75,29 @@ aetherforge validate-flash --model <your-open-moe-checkpoint> --out report.json
 
 ---
 
+## `eval`
+
+Pack-driven eval harness. Benchmarks live on the DomainPack (`data.benchmarks` or a pack file).
+
+```bash
+aetherforge eval --recipe dryrun --dry-run
+aetherforge eval -c configs/base.yaml -c configs/domains/example_logistics.yaml --dry-run --out artifacts/pack_eval.json
+aetherforge eval --recipe dryrun --llm --llm-base http://127.0.0.1:8095/v1
+```
+
+Dry-run scores nearest eval texts against `must_include` / `must_not_include`. `--llm` is skipped on `--dry-run`.
+
+## `thd`
+
+Trajectory Hive Distillation pairs (stub, or live OpenAI-compat).
+
+```bash
+aetherforge thd --recipe dryrun --dry-run --out artifacts/thd/preference_pairs.jsonl
+aetherforge thd --recipe dryrun --live --llm-base http://127.0.0.1:8095/v1
+```
+
+`--live` is ignored when `--dry-run` is set.
+
 ## `doctor` / `version`
 
 ```bash

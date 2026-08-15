@@ -16,6 +16,7 @@ Recipes are thin YAML overlays on top of `configs/base.yaml` (+ model config).
 | `recipes/flagship_flash_domain.yaml` | specialist | Flash | Domain specialist |
 | `recipes/broad_flash_192gb.yaml` | **broad** | Flash | Multi-skill on 2×96 GB |
 | `recipes/wide_flash_192gb.yaml` | wide | Flash | Lattice LoRA |
+| `recipes/qwen38_27b.yaml` | specialist | Qwen3.8-27B **dense** | Vast QLoRA (not sparse ESFT) |
 
 ## Domain configs
 
@@ -30,7 +31,8 @@ Recipes are thin YAML overlays on top of `configs/base.yaml` (+ model config).
 |------|---------|
 | `configs/base.yaml` | Defaults |
 | `configs/<moe_family_profile>.yaml` | example fused-expert PEFT family profile |
-| `configs/<moe_family_profile>.yaml` | optional compact-MoE / QLoRA profile |
+| `configs/qwen_a3b.yaml` | Qwen A3B-class sparse MoE / QLoRA |
+| `configs/qwen38_27b.yaml` | Qwen3.8-27B official HF — **dense** VL PEFT (Vast) |
 
 ## Examples
 

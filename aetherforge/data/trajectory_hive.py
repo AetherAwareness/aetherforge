@@ -28,29 +28,41 @@ class HiveTrajectory:
 
 class TrajectoryHive:
     """
-    Offline THD generator.
+    Trajectory Hive Distillation.
 
-    Live mode (future): spawn vLLM/llama-server agents per specialist checkpoint.
-    Scaffold mode: multi-view answers → preference pairs.
+    Scaffold mode: multi-view stub answers → preference pairs (always available).
+    Live mode: OpenAI-compat `llm_fn(system, user) -> str` per specialist.
     """
 
-    def __init__(self, specialists: Optional[list[str]] = None, seed: int = 42):
+    def __init__(
+        self,
+        specialists: Optional[list[str]] = None,
+        seed: int = 42,
+        llm_fn: Optional[Any] = None,
+    ):
         self.specialists = specialists or ["alpha", "beta", "gamma"]
         self.rng = random.Random(seed)
+        self.llm_fn = llm_fn
 
     def generate(
         self,
         problems: list[str],
         domain: str,
         pairs_per_problem: int = 1,
+        *,
+        live: bool = False,
     ) -> tuple[list[dict[str, Any]], list[dict[str, str]]]:
         trajectories: list[dict[str, Any]] = []
         pairs: list[dict[str, str]] = []
+        use_live = bool(live and self.llm_fn is not None)
 
         for problem in problems:
             answers = {}
             for sp in self.specialists:
-                answers[sp] = self._stub_answer(sp, domain, problem)
+                if use_live:
+                    answers[sp] = self._live_answer(sp, domain, problem)
+                else:
+                    answers[sp] = self._stub_answer(sp, domain, problem)
 
             ordered = sorted(answers.items(), key=lambda kv: len(kv[1]), reverse=True)
             best_sp, consensus = ordered[0]
@@ -80,18 +92,39 @@ class TrajectoryHive:
                         "prompt": f"[{domain}] {problem}\nProvide the best specialist answer.",
                         "chosen": consensus,
                         "rejected": minority,
-                        "source": "thd",
-                        "meta": {"winner": best_sp, "loser": worst_sp},
+                        "source": "thd_live" if use_live else "thd",
+                        "meta": {
+                            "winner": best_sp,
+                            "loser": worst_sp,
+                            "live": use_live,
+                        },
                     }
                 )
 
         log.info(
-            "THD: %d problems → %d trajectories, %d preference pairs",
+            "THD: %d problems → %d trajectories, %d preference pairs (live=%s)",
             len(problems),
             len(trajectories),
             len(pairs),
+            use_live,
         )
         return trajectories, pairs
+
+    def _live_answer(self, specialist: str, domain: str, problem: str) -> str:
+        lens = specialist.replace("_", " ")
+        system = (
+            f"You are the `{specialist}` specialist in the {domain} hive. "
+            f"Answer from a {lens} perspective. Structured bullets. "
+            "State assumptions, discriminators, stop/escalate rules, and residual uncertainty. "
+            "Do not overclaim."
+        )
+        try:
+            text = self.llm_fn(system, problem)  # type: ignore[misc]
+            if text and str(text).strip():
+                return str(text).strip()
+        except Exception as e:
+            log.warning("live THD %s failed (%s); falling back to stub", specialist, e)
+        return self._stub_answer(specialist, domain, problem)
 
     def _stub_answer(self, specialist: str, domain: str, problem: str) -> str:
         depth = 3 + self.rng.randint(0, 4)

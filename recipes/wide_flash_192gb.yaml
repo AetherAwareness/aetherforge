@@ -54,10 +54,10 @@ data:
     - factual_world
     - chat_social
   mix_paths:
-    - /home/trinity/aether_data/training/public-aether-dataset.chat.jsonl
+    - data/samples/logistics/train.jsonl
   mix_max_per_source: 5000
-  curated_path: /home/trinity/aether_data/training/public-aether-dataset.chat.jsonl
-  eval_path: /home/trinity/aether_data/training/public-aether-eval.jsonl
+  curated_path: data/samples/logistics/train.jsonl
+  eval_path: data/samples/logistics/eval.jsonl
   synthetic:
     enabled: true
     num_samples: 12000

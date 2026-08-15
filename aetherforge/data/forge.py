@@ -54,10 +54,18 @@ class DataBundle:
 
 
 class DataForge:
-    def __init__(self, config: DataConfig, audit: Optional[AuditLog] = None):
+    def __init__(
+        self,
+        config: DataConfig,
+        audit: Optional[AuditLog] = None,
+        llm_fn: Optional[Any] = None,
+        live_thd: bool = False,
+    ):
         self.config = config
         self.audit = audit
         self.gates = QualityGateRunner(config.quality_gates)
+        self.llm_fn = llm_fn
+        self.live_thd = live_thd
 
     def build(self, output_dir: str | Path) -> DataBundle:
         output_dir = Path(output_dir)
@@ -123,8 +131,16 @@ class DataForge:
             seeds = [s for s in seeds if s] or [
                 f"Hard case {i} in {pack.domain}" for i in range(16)
             ]
-            hive = TrajectoryHive(specialists=pack.specialists, seed=cfg.seed)
-            thd_traj, pairs = hive.generate(seeds, pack.domain)
+            hive = TrajectoryHive(
+                specialists=pack.specialists,
+                seed=cfg.seed,
+                llm_fn=self.llm_fn,
+            )
+            thd_traj, pairs = hive.generate(
+                seeds,
+                pack.domain,
+                live=bool(self.live_thd and self.llm_fn is not None),
+            )
 
         merged = curated + synthetic + thd_traj
         filtered, report = self.gates.filter_records(merged)

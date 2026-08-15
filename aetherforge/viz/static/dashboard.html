@@ -1072,6 +1072,7 @@ async function selectRun(name) {
   selected = name;
   await loadRuns();
   await loadDetail(true);
+  if (auto && typeof EventSource !== 'undefined') startSSE();
 }
 
 async function loadDetail() {
@@ -1080,8 +1081,10 @@ async function loadDetail() {
     const bundle = await api('/api/runs/' + encodeURIComponent(selected));
     lastBundle = bundle;
     renderDetail(bundle);
-    $('pollPill').className = 'pill live';
-    $('pollPill').textContent = 'linked';
+    if (!es) {
+      $('pollPill').className = 'pill live';
+      $('pollPill').textContent = 'linked';
+    }
   } catch (e) {
     $('pollPill').className = 'pill fail';
     $('pollPill').textContent = 'error';
@@ -2086,11 +2089,47 @@ async function loadProviders() {
   }
 }
 
+let es = null;
+function stopLive() {
+  if (es) { try { es.close(); } catch (_) {} es = null; }
+}
+function applyLiveSnap(snap) {
+  if (!snap) return;
+  if (!selected && snap.run) {
+    selected = snap.run;
+  }
+  loadRuns();
+  if (selected) loadDetail();
+}
+function startSSE() {
+  stopLive();
+  if (typeof EventSource === 'undefined') return false;
+  try {
+    const q = selected ? ('?run=' + encodeURIComponent(selected)) : '';
+    es = new EventSource('/api/stream' + q);
+    es.addEventListener('live', (ev) => {
+      try { applyLiveSnap(JSON.parse(ev.data)); } catch (_) {}
+      $('pollPill').className = 'pill live';
+      $('pollPill').textContent = 'sse';
+    });
+    es.onerror = () => {
+      stopLive();
+      $('pollPill').className = 'pill warn';
+      $('pollPill').textContent = 'poll';
+      if (auto && !timer) timer = setInterval(tick, 2000);
+    };
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
 function setAuto(on) {
   auto = on;
   $('btnAuto').textContent = 'Link: ' + (auto ? 'ON' : 'OFF');
-  if (timer) clearInterval(timer);
-  if (auto) timer = setInterval(tick, 2000);
+  if (timer) { clearInterval(timer); timer = null; }
+  if (!auto) { stopLive(); return; }
+  if (startSSE()) return;
+  timer = setInterval(tick, 2000);
 }
 async function tick() {
   try {
@@ -2102,6 +2141,10 @@ async function tick() {
         const name = act.active.run_dir.split('/').pop();
         if (name) await selectRun(name);
       }
+    }
+    if (auto && $('pollPill').textContent !== 'sse') {
+      $('pollPill').className = 'pill live';
+      $('pollPill').textContent = 'poll';
     }
   } catch (e) {
     $('pollPill').className = 'pill warn';

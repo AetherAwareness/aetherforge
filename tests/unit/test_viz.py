@@ -3,6 +3,7 @@ from pathlib import Path
 
 from aetherforge.viz.progress import LiveProgress, StageState
 from aetherforge.viz import run_store
+from aetherforge.viz.run_store import public_path
 
 
 def test_live_progress_writes(tmp_path):
@@ -71,3 +72,30 @@ def test_run_store_list_and_control(tmp_path):
     out = run_store.force_promote_package(run, note="ship it")
     assert out["ok"] is True
     assert (run / "promoted" / "manifest.json").exists()
+
+
+def test_sse_snapshot_shape(tmp_path):
+    from aetherforge.viz.server import DashboardHandler
+
+    run = tmp_path / "sse-run"
+    run.mkdir()
+    (run / "live_status.json").write_text(
+        '{"status":"running","percent":40,"run_id":"sse1"}', encoding="utf-8"
+    )
+    (tmp_path / "active.json").write_text(
+        json.dumps({"run_id": "sse1", "run_dir": str(run), "status": "running"}),
+        encoding="utf-8",
+    )
+    DashboardHandler.runs_root = tmp_path
+    handler = DashboardHandler.__new__(DashboardHandler)
+    handler.runs_root = tmp_path
+    snap = DashboardHandler._sse_snapshot(handler, "sse-run")
+    assert snap["schema"] == "aetherforge.sse.v1"
+    assert snap["live"]["percent"] == 40
+    assert snap["run"] == "sse-run"
+
+
+def test_public_path_prefers_aetherforge_when_shared():
+    p = public_path("/home/trinity/aetherforge/artifacts/runs")
+    assert "aetherforge" in str(p)
+    assert "hiveforge" not in str(p)

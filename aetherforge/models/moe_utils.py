@@ -96,7 +96,12 @@ def infer_family_from_name(name: str) -> str:
     n = name.lower()
     if "deepseek" in n and ("v4" in n or "flash" in n):
         return "deepseek_v4_flash"
-    if "a3b" in n or "qwen3" in n or "qwen2-moe" in n or "qwen2_moe" in n:
+    # Official Qwen3.8-27B HF is dense VL — not sparse A3B
+    if "qwen3.8" in n or "qwen3_8" in n or "qwen38" in n or "qwen3-8" in n:
+        return "qwen38_dense"
+    if "a3b" in n or "qwen2-moe" in n or "qwen2_moe" in n:
+        return "qwen_a3b"
+    if "qwen3" in n and "a3b" in n:
         return "qwen_a3b"
     if "deepseek" in n:
         return "deepseek_v4_flash"

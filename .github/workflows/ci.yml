@@ -22,3 +22,14 @@ jobs:
         run: pytest tests/ -q --tb=short
       - name: Groups preview smoke
         run: python -m aetherforge.cli groups --preview --family deepseek_v4_flash --num-groups 8
+      - name: Dry-run + pack-eval smoke
+        run: |
+          python -m aetherforge.cli train --recipe dryrun --dry-run --quiet
+          python -m aetherforge.cli eval --recipe dryrun --dry-run
+          python -m aetherforge.cli thd --recipe dryrun --dry-run --out /tmp/af-thd.jsonl
+      - name: Validate named recipes
+        run: |
+          python -m aetherforge.cli validate --recipe dryrun
+          python -m aetherforge.cli validate --recipe qwen38-27b
+          python -m aetherforge.cli validate --recipe broad-flash
+          python -m aetherforge.cli validate --recipe a3b-logistics

@@ -46,6 +46,17 @@ from aetherforge.utils.logging import get_logger
 log = get_logger("data.domain_pack")
 
 
+class PackBenchmark(BaseModel):
+    """One pack-owned eval case. Industry content lives here, never in trainer code."""
+
+    id: str
+    prompt: str
+    must_include: list[str] = Field(default_factory=list)
+    must_not_include: list[str] = Field(default_factory=list)
+    gold: Optional[str] = None
+    weight: float = 1.0
+
+
 class DomainPack(BaseModel):
     domain: str = "general"
     description: Optional[str] = None
@@ -58,9 +69,17 @@ class DomainPack(BaseModel):
     angles: list[str] = Field(default_factory=list)
     hints: list[str] = Field(default_factory=list)
     high_stakes: bool = False
+    benchmarks: list[PackBenchmark] = Field(default_factory=list)
 
     def merge_from_data_config(self, data: DataConfig) -> "DomainPack":
         """Inline DataConfig fields override pack fields when non-empty."""
+        benches = list(self.benchmarks)
+        extra = getattr(data, "benchmarks", None) or []
+        if extra:
+            benches = [
+                b if isinstance(b, PackBenchmark) else PackBenchmark.model_validate(b)
+                for b in extra
+            ]
         return DomainPack(
             domain=data.domain or self.domain,
             description=data.description or self.description,
@@ -73,6 +92,7 @@ class DomainPack(BaseModel):
             angles=list(self.angles),
             hints=list(self.hints),
             high_stakes=self.high_stakes,
+            benchmarks=benches,
         )
 
 

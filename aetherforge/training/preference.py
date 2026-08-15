@@ -42,11 +42,55 @@ class PreferenceResult:
         }
 
 
+_LIVE_CHOSEN_SYS = (
+    "You are the winning specialist. Give the better, more grounded answer. "
+    "Structured. Explicit assumptions, discriminators, stop rules. No overclaim."
+)
+_LIVE_REJECTED_SYS = (
+    "You are the losing specialist. Give a weaker answer: vaguer, missing stop "
+    "conditions, slightly overconfident, thinner evidence. Still on-topic."
+)
+
+
 class PreferenceAligner:
     """Stage-5 preference alignment (DPO / GRPO / offline export)."""
 
     def __init__(self, method: str = "dpo"):
         self.method = method
+
+    def synthesize_live(
+        self,
+        prompts: list[str],
+        *,
+        llm_fn: Any,
+        domain: str = "general",
+        source: str = "thd_live",
+    ) -> list[PreferencePair]:
+        """Mint chosen/rejected pairs via OpenAI-compat LLM. Caller skips on dry-run."""
+        pairs: list[PreferencePair] = []
+        for prompt in prompts:
+            if not prompt or not str(prompt).strip():
+                continue
+            user = f"[{domain}] {prompt}"
+            try:
+                chosen = str(llm_fn(_LIVE_CHOSEN_SYS, user) or "").strip()
+                rejected = str(llm_fn(_LIVE_REJECTED_SYS, user) or "").strip()
+            except Exception as e:
+                log.warning("live THD synthesize failed: %s", e)
+                continue
+            if not chosen or not rejected or chosen == rejected:
+                continue
+            pairs.append(
+                PreferencePair(
+                    prompt=user,
+                    chosen=chosen,
+                    rejected=rejected,
+                    source=source,
+                    meta={"live": True, "domain": domain},
+                )
+            )
+        log.info("live THD synthesized %d pairs from %d prompts", len(pairs), len(prompts))
+        return pairs
 
     def run(
         self,

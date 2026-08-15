@@ -14,6 +14,7 @@ Endpoints:
   GET  /api/runs/<name>/forensics        full sector inventory (what each sector contains)
   POST /api/runs/<name>/groups           patch plan / repartition
   GET  /api/active           pointer to newest active run
+  GET  /api/stream           SSE live_status push (query: run=name, interval=0.5)
   GET  /api/studio/preview   invent groups for a model family (no run)
   GET  /api/studio/forensics invent groups + forensics without a run
   POST /api/runs/<name>/control  {action: approve|reject|force_promote, note?: str}
@@ -23,6 +24,7 @@ from __future__ import annotations
 
 import json
 import mimetypes
+import time
 import traceback
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -76,6 +78,12 @@ class DashboardHandler(BaseHTTPRequestHandler):
                     return self._json(200, {"active": runs[0] if runs else None})
                 data = json.loads(active_path.read_text(encoding="utf-8"))
                 return self._json(200, {"active": data})
+            if path == "/api/stream":
+                qs = parse_qs(parsed.query)
+                return self._sse_stream(
+                    run_name=(qs.get("run") or [None])[0],
+                    interval=float((qs.get("interval") or ["0.5"])[0]),
+                )
             if path.startswith("/api/runs/"):
                 rest = path[len("/api/runs/") :]
                 parts = [p for p in rest.split("/") if p]
@@ -400,6 +408,62 @@ class DashboardHandler(BaseHTTPRequestHandler):
             if result and result.get("run_id") == name:
                 return d
         return None
+
+    def _sse_snapshot(self, run_name: Optional[str]) -> dict[str, Any]:
+        """One live payload for SSE / poll fallback."""
+        active_path = self.runs_root / "active.json"
+        active = None
+        if active_path.exists():
+            try:
+                active = json.loads(active_path.read_text(encoding="utf-8"))
+            except Exception:
+                active = None
+        run_dir = None
+        if run_name:
+            run_dir = self._resolve_run(run_name)
+        elif active and active.get("run_dir"):
+            run_dir = Path(active["run_dir"])
+            if not run_dir.is_dir():
+                run_dir = self._resolve_run(Path(active["run_dir"]).name)
+        live = None
+        if run_dir is not None:
+            live = run_store._read_json(run_dir / "live_status.json")
+        return {
+            "schema": "aetherforge.sse.v1",
+            "ts": time.time(),
+            "run": run_name or (run_dir.name if run_dir else None),
+            "run_dir": str(run_dir) if run_dir else None,
+            "active": active,
+            "live": live or {"status": "unknown"},
+        }
+
+    def _sse_stream(self, run_name: Optional[str], interval: float = 0.5) -> None:
+        interval = min(max(interval, 0.2), 5.0)
+        self.send_response(200)
+        self.send_header("Content-Type", "text/event-stream; charset=utf-8")
+        self.send_header("Cache-Control", "no-cache")
+        self.send_header("Connection", "keep-alive")
+        self.send_header("X-Accel-Buffering", "no")
+        self._cors()
+        self.end_headers()
+        last = None
+        # ~20 minutes at 0.5s; client reconnects
+        ticks = int(1200 / interval)
+        try:
+            for _ in range(max(ticks, 8)):
+                snap = self._sse_snapshot(run_name)
+                blob = json.dumps(snap, default=str)
+                if blob != last:
+                    frame = f"event: live\ndata: {blob}\n\n".encode("utf-8")
+                    self.wfile.write(frame)
+                    self.wfile.flush()
+                    last = blob
+                else:
+                    self.wfile.write(b": keepalive\n\n")
+                    self.wfile.flush()
+                time.sleep(interval)
+        except (BrokenPipeError, ConnectionResetError, OSError):
+            return
 
     def _json(self, code: int, data: Any) -> None:
         raw = json.dumps(data, default=str).encode("utf-8")

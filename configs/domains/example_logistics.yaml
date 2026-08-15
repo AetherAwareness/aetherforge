@@ -27,6 +27,15 @@ data:
     - Quantify stockout cost vs expedite cost under current lead times.
     - Propose a mode-shift plan with ETA confidence bands.
     - Trigger safety-stock recalculation for critical SKUs.
+  benchmarks:
+    - id: stockout_vs_expedite
+      prompt: "Three days of cover left on a promotional SKU. Formal stockout-cost vs expedite-cost decision with owner and stop rule."
+      must_include: [stockout, expedite, stop]
+      must_not_include: [guaranteed, infallible]
+    - id: port_congestion
+      prompt: "Port congestion dwell +5 days on mid-value electronics. Decide mode shift vs wait using stockout cost, working capital, and customer SLA."
+      must_include: [congestion, sla]
+      must_not_include: [zero risk]
   synthetic:
     enabled: true
     num_samples: 500

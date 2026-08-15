@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from aetherforge.utils.config import AetherForgeConfig, load_config, merge_configs
+from aetherforge.utils.config import AetherForgeConfig, ModelConfig, load_config, merge_configs
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -10,6 +10,7 @@ def test_default_config_validates():
     cfg = AetherForgeConfig()
     assert cfg.data.domain == "general"
     assert cfg.affinity.top_k_experts > 0
+    assert ModelConfig(family="qwen38_dense").family == "qwen38_dense"
     # no medical_* fields on thresholds
     thr = cfg.eval.scorecard_thresholds
     assert not hasattr(thr, "medical_score_min") or thr.model_dump().get("medical_score_min") is None

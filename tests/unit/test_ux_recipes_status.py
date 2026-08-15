@@ -13,6 +13,7 @@ def test_recipe_presets():
     assert "dryrun" in ids
     assert "broad-flash" in ids
     assert "wide-flash" in ids
+    assert "qwen38-27b" in ids
     meta = resolve_recipe("broad")
     assert meta["id"] == "broad-flash"
     assert meta["config_paths"]
@@ -22,6 +23,7 @@ def test_recipe_presets():
 def test_resolve_aliases():
     assert resolve_recipe("smoke")["id"] == "dryrun"
     assert resolve_recipe("a3b")["id"] == "a3b-logistics"
+    assert resolve_recipe("qwen38")["id"] == "qwen38-27b"
 
 
 def test_init_domain(tmp_path, monkeypatch):

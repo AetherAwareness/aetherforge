@@ -4,14 +4,16 @@
 [![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://AetherAwareness.github.io/aetherforge/)
 [![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm%20Noncommercial-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
-[![Version](https://img.shields.io/badge/version-0.5.1-informational.svg)](docs/changelog.md)
+[![Version](https://img.shields.io/badge/version-0.5.2-informational.svg)](docs/changelog.md)
 [![Download](https://img.shields.io/badge/download-GitHub%20Release-success.svg)](https://github.com/AetherAwareness/aetherforge/releases)
 
-**Reliable post-training for open sparse MoE models.**
+**Open MoE post-training factory** — expert sectors, forensics, ESFT/LoRA, data contracts, gated AetherPackages.
 
-Carve open **Mixture-of-Experts** checkpoints into visual **expert sectors**, forensically inspect what each sector contains (with honest evidence tiers), train with **specialist / broad / wide** postures, enforce **per-sector data contracts**, promote gated **AetherPackages** — and never confuse dry-run CI completeness with weight-level MoE readiness.
+Carve open **Mixture-of-Experts** checkpoints into visual **expert sectors**, inspect what each sector contains (with honest evidence tiers), train with **specialist / broad / wide** postures, and never confuse dry-run CI completeness with weight-level MoE readiness.
 
-> **v0.5.1** — PolyForm Noncommercial · complete operator guide · evidence tiers · sequential sector workflow · fused-expert PEFT · Training Console  
+> **Public status (v0.5.2): beta.** A stranger can clone, install, dry-run, eval, and open the dashboard with no GPU. Live PEFT on a rented GPU is supported plumbing, not a turnkey guarantee — dry-run scorecards are **CI completeness**, never MoE promotion. Noncommercial license ([COMMERCIAL.md](COMMERCIAL.md)).
+
+> **v0.5.2** — pack eval · live THD · Qwen3.8 dense PEFT · dashboard SSE · Hermes skill · PolyForm Noncommercial · sequential sector workflow  
 > **© 2026 AetherAwareness** — free for noncommercial use; **not free to monetize** ([COMMERCIAL.md](COMMERCIAL.md)).
 
 | | |

@@ -47,6 +47,18 @@ _FAMILY_PROFILES: dict[str, dict[str, float | int | str]] = {
         "num_layers": 32,
         "notes": "Generic sparse MoE defaults — override in config.",
     },
+    "qwen38_dense": {
+        "total_params_b": 27.0,
+        "active_params_b": 27.0,
+        "num_experts": 1,
+        "top_k": 1,
+        "num_shared_experts": 0,
+        "num_layers": 64,
+        "notes": (
+            "Qwen3.8-27B official HF is dense VL (not sparse MoE). "
+            "Use PEFT/QLoRA on Vast; Expert Group Studio is a no-op."
+        ),
+    },
 }
 
 
@@ -65,6 +77,9 @@ def estimate_capacity(
 ) -> ModelCapacity:
     fam = family if family in _FAMILY_PROFILES else (
         "deepseek_v4_flash" if "deepseek" in model_name.lower() or "flash" in model_name.lower()
+        else "qwen38_dense" if any(
+            t in model_name.lower() for t in ("qwen3.8", "qwen3_8", "qwen38")
+        )
         else "qwen_a3b" if "a3b" in model_name.lower() or "qwen" in model_name.lower()
         else "generic_moe"
     )

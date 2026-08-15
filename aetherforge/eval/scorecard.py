@@ -104,6 +104,7 @@ class ReliabilityScorecard:
         quality_report: Optional[dict[str, Any]] = None,
         domain_keywords: Optional[list[str]] = None,
         sector_workflow: Optional[dict[str, Any]] = None,
+        pack_eval: Optional[dict[str, Any]] = None,
     ) -> Scorecard:
         eval_texts = eval_texts or []
         metrics: dict[str, float] = {}
@@ -197,6 +198,15 @@ class ReliabilityScorecard:
             metrics["sector_keep_rate"] = float(
                 sector_workflow.get("n_trained") or 0
             ) / n_sec
+
+        if pack_eval:
+            details["pack_eval"] = {
+                k: pack_eval.get(k)
+                for k in ("schema", "score", "n", "n_scored", "mode", "dry_run")
+            }
+            if pack_eval.get("n"):
+                metrics["pack_eval_score"] = float(pack_eval.get("score") or 0.0)
+                details["pack_eval_mode"] = pack_eval.get("mode")
 
         thr = self.config.scorecard_thresholds
         # Generic domain-depth axis (any industry)

@@ -24,7 +24,8 @@ def setup_logging(
         fmt="%(asctime)s | %(levelname)-7s | %(name)s | %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
-    sh = logging.StreamHandler(sys.stdout)
+    # Logs on stderr so CLI JSON on stdout stays parseable.
+    sh = logging.StreamHandler(sys.stderr)
     sh.setFormatter(fmt)
     root.addHandler(sh)
 

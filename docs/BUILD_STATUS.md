@@ -2,7 +2,7 @@
 
 ## Version
 
-**0.5.1** — **PolyForm Noncommercial** © AetherAwareness · complete GUIDE · MoE fidelity · Sector Forge · sequential workflow · fused-expert profile PEFT
+**0.5.2** — pack eval · live THD · Qwen3.8 dense PEFT · dashboard SSE · Hermes skill · **0.5.1** PolyForm Noncommercial · MoE fidelity · Sector Forge
 
 ## 0.4.0 — Sector-perfect training loop (2026-08-04)
 
@@ -78,11 +78,28 @@ aetherforge runs        # JSON list of runs
 - Dashboard: pipeline, scorecard meters, affinity heatmap, util bars, log tail  
 - Controls: human approve / reject / force promote  
 
+## 0.5.2 shipped (2026-08-14)
+
+| Cut | Status |
+|-----|--------|
+| Pack-defined eval harness | **done** — `aetherforge eval`, `pack_eval.json`, scorecard `pack_eval_score` |
+| Multi-theme affinity probes | **done** — offline always; live when a bundle is loaded + `affinity.multi_theme_probes` |
+| Live THD via OpenAI-compat | **done** — `aetherforge thd --live`, `providers.use_llm_for_thd` (skip dry-run) |
+| Hermes skill wrapping CLI | **done** — `~/.hermes/skills/aetherforge` + `skills/hermes/SKILL.md` |
+| Live dashboard events | **done** — SSE `GET /api/stream`, poll fallback |
+| Qwen3.8-27B train profile | **done** — `configs/qwen38_27b.yaml` + `--recipe qwen38-27b` (dense QLoRA, Vast) |
+
+```bash
+aetherforge eval --recipe dryrun --dry-run
+aetherforge thd --recipe dryrun --dry-run
+aetherforge train --recipe qwen38-27b --dry-run
+aetherforge train --recipe dryrun --dry-run
+```
+
 ## Next cuts
 
-1. Live MoE PEFT on Vast with real domain pack + corpus (sector workflow end-to-end)  
-2. Real eval harness driven by pack-defined benchmarks  
-3. Live multi-theme affinity probes feeding forensic content scores  
-4. Live THD via OpenAI-compat LLM  
-5. Hermes skill wrapping CLI  
-6. Optional WebSocket push (currently 2s poll)  
+1. Live MoE PEFT on Vast with a real domain pack + corpus (sector workflow end-to-end — operator GPU $)  
+2. Live Qwen3.8-27B QLoRA on Vast against a downloaded HF tree  
+3. Optional richer dashboard (WebSocket instead of SSE) if SSE proves chatty on long runs  
+
+**Public readiness:** beta for clone / install / dry-run / dashboard / pack eval. Not a turnkey live-train guarantee.  

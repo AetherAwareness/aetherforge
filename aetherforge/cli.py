@@ -34,7 +34,7 @@ def _add_config_args(p: argparse.ArgumentParser) -> None:
     p.add_argument(
         "--recipe",
         default=None,
-        help="Named preset: dryrun | broad-flash | wide-flash | flash-domain | a3b-logistics",
+        help="Named preset: dryrun | broad-flash | wide-flash | flash-domain | a3b-logistics | qwen38-27b",
     )
 
 
@@ -362,11 +362,154 @@ def cmd_scorecard(args: argparse.Namespace) -> int:
             for l in Path(args.eval).read_text(encoding="utf-8").splitlines()
             if l.strip()
         ]
+    pack_eval_payload = None
+    try:
+        from aetherforge.data.domain_pack import resolve_domain_pack
+        from aetherforge.eval.pack_eval import evaluate_pack
+
+        pe = evaluate_pack(
+            resolve_domain_pack(cfg.data),
+            eval_texts=eval_texts,
+            dry_run=args.dry_run,
+        )
+        pack_eval_payload = pe.to_dict()
+    except Exception:
+        pack_eval_payload = None
     sc = scorer.evaluate(
-        affinity=affinity, eval_texts=eval_texts, dry_run=args.dry_run
+        affinity=affinity,
+        eval_texts=eval_texts,
+        dry_run=args.dry_run,
+        pack_eval=pack_eval_payload,
     )
     print(json.dumps(sc.to_dict(), indent=2))
     return 0 if sc.passed else 2
+
+
+def cmd_eval(args: argparse.Namespace) -> int:
+    """Pack-driven eval harness (benchmarks on the DomainPack)."""
+    from aetherforge.data.domain_pack import resolve_domain_pack
+    from aetherforge.eval.pack_eval import evaluate_pack, write_pack_eval
+    from aetherforge.utils.llm_client import LLMConfig, OpenAICompatClient, make_llm_fn
+
+    cfg = _load(args)
+    pack = resolve_domain_pack(cfg.data)
+    eval_texts: list[str] = []
+    if args.eval:
+        raw = Path(args.eval).read_text(encoding="utf-8")
+        for line in raw.splitlines():
+            if not line.strip():
+                continue
+            if line.strip().startswith("{"):
+                try:
+                    eval_texts.append(json.loads(line).get("text") or line)
+                    continue
+                except json.JSONDecodeError:
+                    pass
+            eval_texts.append(line)
+    llm_fn = None
+    if args.llm and not args.dry_run:
+        if args.llm_base:
+            llm_fn = make_llm_fn(
+                LLMConfig(base_url=args.llm_base, model=args.llm_model or "local")
+            )
+        else:
+            client = OpenAICompatClient()
+            if client.available():
+                llm_fn = make_llm_fn()
+    report = evaluate_pack(
+        pack,
+        eval_texts=eval_texts,
+        llm_fn=llm_fn,
+        dry_run=bool(args.dry_run or cfg.run.dry_run),
+    )
+    if args.out:
+        write_pack_eval(report, args.out)
+    print(json.dumps(report.to_dict(), indent=2, default=str))
+    if report.n == 0:
+        return 0
+    thr = getattr(cfg.eval.scorecard_thresholds, "pack_eval_min", None)
+    if thr is not None and report.score < float(thr):
+        return 2
+    return 0
+
+
+def cmd_thd(args: argparse.Namespace) -> int:
+    """Generate Trajectory Hive Distillation pairs (stub or live OpenAI-compat)."""
+    from aetherforge.data.domain_pack import resolve_domain_pack
+    from aetherforge.data.trajectory_hive import TrajectoryHive
+    from aetherforge.training.preference import PreferenceAligner
+    from aetherforge.utils.llm_client import LLMConfig, OpenAICompatClient, make_llm_fn
+
+    cfg = _load(args)
+    pack = resolve_domain_pack(cfg.data)
+    if args.prompts:
+        problems = [
+            ln.strip()
+            for ln in Path(args.prompts).read_text(encoding="utf-8").splitlines()
+            if ln.strip()
+        ]
+    else:
+        problems = list(pack.topics)[:8] or [
+            f"Hard case in {pack.domain}: state assumptions and a stop rule."
+        ]
+    llm_fn = None
+    live = bool(args.live) and not args.dry_run
+    if live:
+        if args.llm_base:
+            llm_fn = make_llm_fn(
+                LLMConfig(base_url=args.llm_base, model=args.llm_model or "local")
+            )
+        else:
+            client = OpenAICompatClient()
+            if not client.available():
+                print(
+                    json.dumps(
+                        {
+                            "ok": False,
+                            "error": "no OpenAI-compat LLM (set AETHERFORGE_LLM_BASE or --llm-base)",
+                        }
+                    )
+                )
+                return 2
+            llm_fn = make_llm_fn()
+    hive = TrajectoryHive(specialists=pack.specialists, seed=cfg.data.seed, llm_fn=llm_fn)
+    traj, pairs = hive.generate(problems, pack.domain, live=live)
+    extra = []
+    if live and llm_fn is not None:
+        extra = PreferenceAligner().synthesize_live(
+            problems, llm_fn=llm_fn, domain=pack.domain
+        )
+        pairs = list(pairs) + [
+            {
+                "prompt": p.prompt,
+                "chosen": p.chosen,
+                "rejected": p.rejected,
+                "source": p.source,
+                "meta": p.meta,
+            }
+            for p in extra
+        ]
+    out = Path(args.out or "artifacts/thd/preference_pairs.jsonl")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    with open(out, "w", encoding="utf-8") as f:
+        for p in pairs:
+            f.write(json.dumps(p, ensure_ascii=False) + "\n")
+    print(
+        json.dumps(
+            {
+                "ok": True,
+                "live": live,
+                "n_problems": len(problems),
+                "n_trajectories": len(traj),
+                "n_pairs": len(pairs),
+                "n_live_extra": len(extra),
+                "path": str(out),
+                "domain": pack.domain,
+            },
+            indent=2,
+        )
+    )
+    return 0
 
 
 def cmd_package(args: argparse.Namespace) -> int:
@@ -1220,6 +1363,38 @@ def build_parser() -> argparse.ArgumentParser:
     sc.add_argument("--eval", help="eval jsonl/text path")
     sc.set_defaults(func=cmd_scorecard)
 
+    ev = sub.add_parser(
+        "eval",
+        help="Pack-driven eval harness (DomainPack.benchmarks → pack_eval.json)",
+    )
+    _add_config_args(ev)
+    ev.add_argument("--eval", help="eval jsonl/text path used as answer proxies")
+    ev.add_argument("--out", help="Write pack_eval.json path")
+    ev.add_argument(
+        "--llm",
+        action="store_true",
+        help="Generate answers via OpenAI-compat (skipped on --dry-run)",
+    )
+    ev.add_argument("--llm-base", default=None)
+    ev.add_argument("--llm-model", default=None)
+    ev.set_defaults(func=cmd_eval)
+
+    th = sub.add_parser(
+        "thd",
+        help="Trajectory Hive Distillation pairs (stub, or --live OpenAI-compat)",
+    )
+    _add_config_args(th)
+    th.add_argument("--prompts", help="Prompts file, one problem per line")
+    th.add_argument("--out", help="preference_pairs.jsonl path")
+    th.add_argument(
+        "--live",
+        action="store_true",
+        help="Call OpenAI-compat LLM (never on --dry-run)",
+    )
+    th.add_argument("--llm-base", default=None)
+    th.add_argument("--llm-model", default=None)
+    th.set_defaults(func=cmd_thd)
+
     pk = sub.add_parser("package", help="Build AetherPackage from a run directory")
     _add_config_args(pk)
     pk.add_argument("--run-dir", required=True, help="Pipeline run directory")
@@ -1485,7 +1660,7 @@ def build_parser() -> argparse.ArgumentParser:
     g.add_argument(
         "--family",
         default="deepseek_v4_flash",
-        choices=["deepseek_v4_flash", "qwen_a3b", "generic_moe"],
+        choices=["deepseek_v4_flash", "qwen_a3b", "qwen38_dense", "generic_moe"],
     )
     g.add_argument("--model", default="")
     g.add_argument("--num-groups", type=int, default=8, help="How many sectors to call up")
@@ -1525,7 +1700,7 @@ def build_parser() -> argparse.ArgumentParser:
     fo.add_argument(
         "--family",
         default="deepseek_v4_flash",
-        choices=["deepseek_v4_flash", "qwen_a3b", "generic_moe"],
+        choices=["deepseek_v4_flash", "qwen_a3b", "qwen38_dense", "generic_moe"],
     )
     fo.add_argument("--model", default="")
     fo.add_argument("--num-groups", type=int, default=12)

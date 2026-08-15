@@ -14,6 +14,20 @@ from aetherforge.utils.logging import get_logger
 log = get_logger("viz.run_store")
 
 
+def public_path(path: str | Path) -> Path:
+    """Prefer ~/aetherforge when artifacts are bind-mounted / shared with hiveforge."""
+    p = Path(path).resolve()
+    s = str(p)
+    if "/hiveforge/" in s:
+        alt = Path(s.replace("/hiveforge/", "/aetherforge/", 1))
+        try:
+            if alt.exists() and alt.samefile(p):
+                return alt
+        except OSError:
+            pass
+    return p
+
+
 def default_runs_root() -> Path:
     # Prefer repo-local artifacts, then cwd
     candidates = [
@@ -23,8 +37,8 @@ def default_runs_root() -> Path:
     ]
     for c in candidates:
         if c.exists():
-            return c
-    return candidates[0]
+            return public_path(c)
+    return public_path(candidates[0])
 
 
 def list_runs(runs_root: Optional[str | Path] = None, limit: int = 50) -> list[dict[str, Any]]:

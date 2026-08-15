@@ -3,7 +3,7 @@
 # Connect Vast.ai / RunPod / SSH → sync → start training → dashboard
 set -euo pipefail
 
-ROOT="${AETHERFORGE_ROOT:-/home/trinity/aetherforge}"
+ROOT="${AETHERFORGE_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 PY="$ROOT/.venv/bin/python"
 export PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}"
 export PATH="$ROOT/.venv/bin:$HOME/.local/bin:$PATH"
@@ -32,6 +32,8 @@ CFG_FLASH_BROAD=( -c configs/base.yaml -c configs/deepseek_v4_flash.yaml -c reci
 CFG_FLASH_WIDE=( -c configs/base.yaml -c configs/deepseek_v4_flash.yaml -c recipes/wide_flash_192gb.yaml )
 # A3B logistics flagship
 CFG_A3B=( -c configs/base.yaml -c configs/qwen_a3b.yaml -c recipes/flagship_logistics_a3b.yaml )
+# Qwen3.8-27B dense PEFT (Vast-only live; local = dry-run)
+CFG_QWEN38=( -c configs/base.yaml -c configs/qwen38_27b.yaml -c recipes/qwen38_27b.yaml )
 
 C_CYAN=$'\033[36m'; C_GRN=$'\033[32m'; C_YEL=$'\033[33m'; C_RED=$'\033[31m'
 C_BOLD=$'\033[1m'; C_DIM=$'\033[2m'; C_RST=$'\033[0m'
@@ -243,14 +245,16 @@ pick_recipe() {
   echo "  1) Flash-0731 domain specialist (configs/deepseek_v4_flash + flagship_flash_domain)"
   echo "  2) Flash-0731 + public Aether dataset (product corpus)"
   echo "  3) Qwen A3B logistics flagship"
-  echo "  4) Custom (enter -c paths yourself next)"
+  echo "  4) Qwen3.8-27B dense PEFT (Vast live / local dry-run)"
+  echo "  5) Custom (enter -c paths yourself next)"
   read -r -p "Choice [1]: " r
   r="${r:-1}"
   case "$r" in
     1) RECIPE_NAME="flash-domain"; RECIPE_ARGS=( "${CFG_FLASH[@]}" ) ;;
     2) RECIPE_NAME="flash-aether"; RECIPE_ARGS=( "${CFG_FLASH_AETHER[@]}" ) ;;
     3) RECIPE_NAME="a3b-logistics"; RECIPE_ARGS=( "${CFG_A3B[@]}" ) ;;
-    4)
+    4) RECIPE_NAME="qwen38-27b"; RECIPE_ARGS=( "${CFG_QWEN38[@]}" ) ;;
+    5)
       RECIPE_NAME="custom"
       read -r -p "Extra aetherforge train args (e.g. -c configs/base.yaml -c …): " custom
       # shellcheck disable=SC2206
@@ -318,10 +322,13 @@ do_forensics() {
   echo "${C_BOLD}Sector forensics${C_RST}"
   echo "  1) Flash-0731 12 sectors"
   echo "  2) A3B 8 sectors"
+  echo "  3) Qwen3.8-27B dense (no expert sectors — capacity card only)"
   read -r -p "Choice [1]: " c
   c="${c:-1}"
   if [[ "$c" == "2" ]]; then
     hf forensics --family qwen_a3b --num-groups 8 --markdown | less -R
+  elif [[ "$c" == "3" ]]; then
+    hf forensics --family qwen38_dense --model Qwen/Qwen3.8-27B --num-groups 1 --markdown | less -R
   else
     hf forensics --family deepseek_v4_flash --model deepseek-ai/DeepSeek-V4-Flash-0731 \
       --num-groups 12 --markdown | less -R
